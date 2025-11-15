@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BottomNav from '../../components/BottomNav'; // ✅ 공통 하단 네비게이션
 
 export default function CourseList() {
   const navigate = useNavigate();
@@ -115,7 +116,8 @@ export default function CourseList() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50">
+    // ✅ pb-20 추가: 아래 BottomNav 공간 확보
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50 pb-20">
       {/* 상단 네비게이션 */}
       <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-sky-100 z-50">
         <div className="flex items-center justify-between px-4 py-3">
@@ -277,27 +279,8 @@ export default function CourseList() {
         </div>
       </div>
 
-      {/* 하단 네비게이션 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="grid grid-cols-4 h-16">
-          <button className="flex flex-col items-center justify-center space-y-1 text-sky-500">
-            <i className="ri-map-pin-fill text-lg"></i>
-            <span className="text-xs font-medium">코스</span>
-          </button>
-          <button className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-            <i className="ri-heart-line text-lg"></i>
-            <span className="text-xs">매칭</span>
-          </button>
-          <button className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-            <i className="ri-message-line text-lg"></i>
-            <span className="text-xs">채팅</span>
-          </button>
-          <button className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-            <i className="ri-user-line text-lg"></i>
-            <span className="text-xs">프로필</span>
-          </button>
-        </div>
-      </div>
+      {/* ✅ 공통 하단 네비게이션 */}
+      <BottomNav />
     </div>
   );
 }

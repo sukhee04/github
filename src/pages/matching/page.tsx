@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import BottomNav from '../../components/BottomNav';   // ✅ 공통 하단 네비게이션
 
 export default function Matching() {
   const [activeTab, setActiveTab] = useState('sent');
@@ -95,7 +95,7 @@ export default function Matching() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50 pb-20">
       {/* 상단 네비게이션 */}
       <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-sky-100 z-50">
         <div className="flex items-center justify-between px-4 py-3">
@@ -103,10 +103,9 @@ export default function Matching() {
             <div className="w-8 h-8 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center">
               <i className="ri-heart-line text-white text-lg"></i>
             </div>
-            <h1 className="text-lg font-bold text-gray-800" style={{ fontFamily: 'Pretendard, sans-serif' }}>
-              매칭
-            </h1>
+            <h1 className="text-lg font-bold text-gray-800">매칭</h1>
           </div>
+
           <button className="w-8 h-8 flex items-center justify-center">
             <i className="ri-filter-line text-gray-600 text-lg"></i>
           </button>
@@ -127,6 +126,7 @@ export default function Matching() {
             >
               보낸 요청
             </button>
+
             <button
               onClick={() => setActiveTab('matches')}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
@@ -144,10 +144,7 @@ export default function Matching() {
         {activeTab === 'sent' && (
           <div className="px-4 space-y-4">
             {sentRequests.map((request) => (
-              <div
-                key={request.id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4"
-              >
+              <div key={request.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-lg font-bold text-gray-800 flex-1 mr-2">
                     {request.courseTitle}
@@ -183,7 +180,7 @@ export default function Matching() {
 
                 <div className="flex space-x-2">
                   {request.status === 'pending' && (
-                    <button 
+                    <button
                       onClick={() => handleCancelRequest(request.id)}
                       className="flex-1 bg-red-50 text-red-600 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
                     >
@@ -201,7 +198,7 @@ export default function Matching() {
                 </div>
               </div>
             ))}
-            
+
             {sentRequests.length === 0 && (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -217,10 +214,7 @@ export default function Matching() {
         {activeTab === 'matches' && (
           <div className="px-4 space-y-4">
             {matches.map((match) => (
-              <div
-                key={match.id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4"
-              >
+              <div key={match.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-lg font-bold text-gray-800 flex-1 mr-2">
                     {match.courseTitle}
@@ -263,11 +257,13 @@ export default function Matching() {
                       참가자 ({match.participants.length + 1}명)
                     </span>
                   </div>
+
                   <div className="flex items-center space-x-2">
                     <div className="flex -space-x-2">
                       <div className="w-8 h-8 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center border-2 border-white">
                         <i className="ri-user-line text-white text-sm"></i>
                       </div>
+
                       {match.participants.slice(0, 3).map((participant, index) => (
                         <div
                           key={index}
@@ -278,6 +274,7 @@ export default function Matching() {
                           </span>
                         </div>
                       ))}
+
                       {match.participants.length > 3 && (
                         <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center border-2 border-white">
                           <span className="text-gray-600 text-xs font-medium">
@@ -303,27 +300,8 @@ export default function Matching() {
         )}
       </div>
 
-      {/* 하단 네비게이션 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="grid grid-cols-4 h-16">
-          <button className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-            <i className="ri-map-pin-line text-lg"></i>
-            <span className="text-xs">코스</span>
-          </button>
-          <button className="flex flex-col items-center justify-center space-y-1 text-sky-500">
-            <i className="ri-heart-fill text-lg"></i>
-            <span className="text-xs font-medium">매칭</span>
-          </button>
-          <button className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-            <i className="ri-message-line text-lg"></i>
-            <span className="text-xs">채팅</span>
-          </button>
-          <button className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-            <i className="ri-user-line text-lg"></i>
-            <span className="text-xs">프로필</span>
-          </button>
-        </div>
-      </div>
+      {/* ✅ 공통 하단 네비게이션 */}
+      <BottomNav />
     </div>
   );
 }

@@ -49,6 +49,9 @@ const routes: RouteObject[] = [
     path: '/profile',
     element: <Profile />
   },
+
+
+  // 404
   {
     path: '*',
     element: <NotFound />

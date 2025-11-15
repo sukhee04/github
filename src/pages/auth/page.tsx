@@ -1,5 +1,6 @@
-
-import { useState } from 'react';
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { useNavigate } from 'react-router-dom';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,6 +13,8 @@ export default function Auth() {
     languages: [] as string[],
     interests: [] as string[]
   });
+
+  const navigate = useNavigate(); // ✅ navigate ашиглах бэлтгэл
 
   const availableLanguages = ['한국어', '영어', '중국어', '일본어', '스페인어', '프랑스어'];
   const availableInterests = ['문화체험', '음식', '쇼핑', 'K-POP', '역사', '자연', '예술', '스포츠'];
@@ -34,10 +37,20 @@ export default function Auth() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // 로그인/회원가입 로직
-    console.log('Form submitted:', { ...formData, userType });
+
+    // 🧠 эндээс login / signup API-г дуудахаар төлөвлөж болно
+    if (isLogin) {
+      console.log('로그인 시도:', { ...formData, userType });
+      // TODO: 로그인 API 호출 → 성공시 토큰 저장 гэх мэт
+    } else {
+      console.log('회원가입 시도:', { ...formData, userType });
+      // TODO: 회원가입 API 호출 → 성공시 자동 로그인 처리 гэх мэт
+    }
+
+    // ✅ 로그인/회원가입 амжилттай гэж үзээд шууд нүүр хуудас руу шилжүүлнэ
+    navigate('/', { replace: true });
   };
 
   return (
@@ -45,10 +58,16 @@ export default function Auth() {
       {/* 상단 네비게이션 */}
       <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-sky-100 z-50">
         <div className="flex items-center justify-between px-4 py-3">
-          <button className="w-8 h-8 flex items-center justify-center">
+          <button
+            className="w-8 h-8 flex items-center justify-center"
+            onClick={() => navigate(-1)} // ✅ арын хуудас руу буцах (эсвэл navigate('/') гэж болно)
+          >
             <i className="ri-arrow-left-line text-gray-600 text-lg"></i>
           </button>
-          <h1 className="text-lg font-bold text-gray-800" style={{ fontFamily: 'Pretendard, sans-serif' }}>
+          <h1
+            className="text-lg font-bold text-gray-800"
+            style={{ fontFamily: 'Pretendard, sans-serif' }}
+          >
             {isLogin ? '로그인' : '회원가입'}
           </h1>
           <div className="w-8"></div>
@@ -61,7 +80,10 @@ export default function Auth() {
           <div className="w-16 h-16 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <i className="ri-global-line text-white text-2xl"></i>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2" style={{ fontFamily: 'Pretendard, sans-serif' }}>
+          <h2
+            className="text-2xl font-bold text-gray-800 mb-2"
+            style={{ fontFamily: 'Pretendard, sans-serif' }}
+          >
             문화친구
           </h2>
           <p className="text-gray-600">
@@ -76,7 +98,7 @@ export default function Auth() {
               <h3 className="text-lg font-bold text-gray-800 text-center mb-6">
                 어떤 역할로 참여하시나요?
               </h3>
-              
+
               <button
                 type="button"
                 onClick={() => setUserType('korean')}
@@ -88,7 +110,9 @@ export default function Auth() {
                   </div>
                   <div className="text-left">
                     <h4 className="text-lg font-bold text-gray-800">한국 학생</h4>
-                    <p className="text-sm text-gray-600">문화 체험 코스를 제공하고 유학생들과 교류해요</p>
+                    <p className="text-sm text-gray-600">
+                      문화 체험 코스를 제공하고 유학생들과 교류해요
+                    </p>
                   </div>
                 </div>
               </button>
@@ -104,7 +128,9 @@ export default function Auth() {
                   </div>
                   <div className="text-left">
                     <h4 className="text-lg font-bold text-gray-800">유학생</h4>
-                    <p className="text-sm text-gray-600">한국 문화를 체험하고 현지 친구들과 만나요</p>
+                    <p className="text-sm text-gray-600">
+                      한국 문화를 체험하고 현지 친구들과 만나요
+                    </p>
                   </div>
                 </div>
               </button>
@@ -121,7 +147,9 @@ export default function Auth() {
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData(prev => ({ ...prev, email: e.target.value }))
+                  }
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                   placeholder="이메일을 입력하세요"
                   required
@@ -135,7 +163,9 @@ export default function Auth() {
                 <input
                   type="password"
                   value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData(prev => ({ ...prev, password: e.target.value }))
+                  }
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                   placeholder="비밀번호를 입력하세요"
                   required
@@ -151,7 +181,9 @@ export default function Auth() {
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData(prev => ({ ...prev, name: e.target.value }))
+                      }
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                       placeholder="이름을 입력하세요"
                       required
@@ -165,7 +197,12 @@ export default function Auth() {
                     <input
                       type="text"
                       value={formData.university}
-                      onChange={(e) => setFormData(prev => ({ ...prev, university: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData(prev => ({
+                          ...prev,
+                          university: e.target.value
+                        }))
+                      }
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                       placeholder="대학교를 입력하세요"
                       required
@@ -195,7 +232,9 @@ export default function Auth() {
                           <i className="ri-upload-cloud-line text-sky-500 text-xl"></i>
                         </div>
                         <p className="text-gray-600 text-sm mb-1">
-                          {userType === 'korean' ? '재학증명서를 업로드하세요' : '여권 사본을 업로드하세요'}
+                          {userType === 'korean'
+                            ? '재학증명서를 업로드하세요'
+                            : '여권 사본을 업로드하세요'}
                         </p>
                         <p className="text-gray-400 text-xs">
                           JPG, PNG, PDF 파일 (최대 5MB)
@@ -209,7 +248,7 @@ export default function Auth() {
                       사용 가능한 언어
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {availableLanguages.map((language) => (
+                      {availableLanguages.map(language => (
                         <button
                           key={language}
                           type="button"
@@ -231,7 +270,7 @@ export default function Auth() {
                       관심사
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {availableInterests.map((interest) => (
+                      {availableInterests.map(interest => (
                         <button
                           key={interest}
                           type="button"
@@ -274,7 +313,9 @@ export default function Auth() {
                   }}
                   className="text-sky-500 text-sm font-medium"
                 >
-                  {isLogin ? '계정이 없으신가요? 회원가입' : '이미 계정이 있으신가요? 로그인'}
+                  {isLogin
+                    ? '계정이 없으신가요? 회원가입'
+                    : '이미 계정이 있으신가요? 로그인'}
                 </button>
               </div>
             </div>

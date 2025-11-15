@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import BottomNav from '../../components/BottomNav'; // ✅ 공통 하단 네비
 
 export default function Chat() {
   const [selectedChat, setSelectedChat] = useState<number | null>(null);
@@ -108,6 +108,7 @@ export default function Chat() {
     }
   };
 
+  // ✅ 1) 채팅방 화면 (selectedChat 있음)
   if (selectedChat) {
     const chat = chatList.find(c => c.id === selectedChat);
     
@@ -137,12 +138,12 @@ export default function Chat() {
                   <h1 className="text-lg font-bold text-gray-800" style={{ fontFamily: 'Pretendard, sans-serif' }}>
                     {chat?.title}
                   </h1>
-                  {chat?.type === 'group' && (
+                  {chat?.type === 'group' && chat?.participants && (
                     <p className="text-xs text-gray-500">
                       {chat.participants.length}명 참여중
                     </p>
                   )}
-                  {chat?.type === 'private' && chat.subtitle && (
+                  {chat?.type === 'private' && chat?.subtitle && (
                     <p className="text-xs text-gray-500">{chat.subtitle}</p>
                   )}
                 </div>
@@ -191,7 +192,7 @@ export default function Chat() {
           </div>
         </div>
 
-        {/* 메시지 입력 */}
+        {/* 메시지 입력 (여긴 BottomNav 없음!) */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
           <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
             <button
@@ -232,8 +233,9 @@ export default function Chat() {
     );
   }
 
+  // ✅ 2) 채팅 목록 화면 (BottomNav 있음)
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50 pb-20">
       {/* 상단 네비게이션 */}
       <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-sky-100 z-50">
         <div className="flex items-center justify-between px-4 py-3">
@@ -315,28 +317,8 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* 하단 네비게이션 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="grid grid-cols-4 h-16">
-          <button className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-            <i className="ri-map-pin-line text-lg"></i>
-            <span className="text-xs">코스</span>
-          </button>
-          <button className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-            <i className="ri-heart-line text-lg"></i>
-            <span className="text-xs">매칭</span>
-          </button>
-          <button className="flex flex-col items-center justify-center space-y-1 text-sky-500 relative">
-            <i className="ri-message-fill text-lg"></i>
-            <span className="text-xs font-medium">채팅</span>
-            <div className="absolute top-2 right-6 w-2 h-2 bg-red-500 rounded-full"></div>
-          </button>
-          <button className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-            <i className="ri-user-line text-lg"></i>
-            <span className="text-xs">프로필</span>
-          </button>
-        </div>
-      </div>
+      {/* ✅ 공통 하단 네비게이션 (хуучин 4 товчтой блокыг НЭГ МӨРӨӨР сольсон) */}
+      <BottomNav />
     </div>
   );
 }
