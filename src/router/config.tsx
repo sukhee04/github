@@ -3,10 +3,10 @@ import type { RouteObject } from 'react-router-dom';
 
 const Home = lazy(() => import('../pages/home/page'));
 const Auth = lazy(() => import('../pages/auth/page'));
-const CourseManagement = lazy(() => import('../pages/course-management/page'));
+const CourseManagement = lazy(() => import('../pages/ko/course-management/page'));
 const CourseDetail = lazy(() => import('../pages/course-detail/page'));
 const CourseList = lazy(() => import('../pages/course-list/page'));
-const CourseEdit = lazy(() => import('../pages/course-edit/page'));
+const CourseEdit = lazy(() => import('../pages/ko/course-edit/page'));
 const Matching = lazy(() => import('../pages/matching/page'));
 const Chat = lazy(() => import('../pages/chat/page'));
 const Profile = lazy(() => import('../pages/profile/page'));
