@@ -111,14 +111,14 @@ export default function KoChat() {
   // ✅ 1) 채팅방 화면 (selectedChat 있음)
   if (selectedChat) {
     const chat = chatList.find(c => c.id === selectedChat);
-    
+
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50 pb-20">
         {/* 채팅 헤더 */}
         <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-sky-100 z-50">
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center space-x-3">
-              <button 
+              <button
                 onClick={() => setSelectedChat(null)}
                 className="w-8 h-8 flex items-center justify-center"
               >
@@ -175,11 +175,10 @@ export default function KoChat() {
                     </p>
                   )}
                   <div
-                    className={`px-4 py-3 rounded-2xl ${
-                      message.isMe
-                        ? 'bg-sky-500 text-white rounded-br-md'
-                        : 'bg-white text-gray-800 rounded-bl-md border border-gray-100'
-                    }`}
+                    className={`px-4 py-3 rounded-2xl ${message.isMe
+                      ? 'bg-sky-500 text-white rounded-br-md'
+                      : 'bg-white text-gray-800 rounded-bl-md border border-gray-100'
+                      }`}
                   >
                     <p className="text-sm">{message.message}</p>
                   </div>
@@ -219,11 +218,10 @@ export default function KoChat() {
             <button
               type="submit"
               disabled={!newMessage.trim()}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                newMessage.trim()
-                  ? 'bg-sky-500 text-white'
-                  : 'bg-gray-200 text-gray-400'
-              }`}
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${newMessage.trim()
+                ? 'bg-sky-500 text-white'
+                : 'bg-gray-200 text-gray-400'
+                }`}
             >
               <i className="ri-send-plane-fill text-lg"></i>
             </button>
@@ -273,7 +271,7 @@ export default function KoChat() {
                       <i className="ri-user-line text-white text-lg"></i>
                     </div>
                   )}
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="font-bold text-gray-800 truncate">
@@ -292,15 +290,15 @@ export default function KoChat() {
                         )}
                       </div>
                     </div>
-                    
+
                     {chat.subtitle && (
                       <p className="text-xs text-gray-500 mb-1">{chat.subtitle}</p>
                     )}
-                    
+
                     <p className="text-sm text-gray-600 truncate">
                       {chat.lastMessage}
                     </p>
-                    
+
                     {chat.type === 'group' && chat.participants && (
                       <div className="flex items-center space-x-1 mt-2">
                         <i className="ri-group-line text-gray-400 text-xs"></i>

@@ -11,6 +11,8 @@ const Matching = lazy(() => import('../pages/matching/page'));
 const Chat = lazy(() => import('../pages/chat/page'));
 const Profile = lazy(() => import('../pages/profile/page'));
 const NotFound = lazy(() => import('../pages/NotFound'));
+const KoChat = lazy(() => import('../pages/ko/chat/page'))
+const KoProfile = lazy(() => import('../pages/ko/profile/page'))
 
 const routes: RouteObject[] = [
   {
@@ -42,14 +44,10 @@ const routes: RouteObject[] = [
     element: <Matching />
   },
   {
-    path: '/ko/matching',
-    element: <KoMatching />
-  },
-  {
     path: '/chat',
     element: <Chat />
   },
-    {
+  {
     path: '/ko/chat',
     element: <KoChat />
   },

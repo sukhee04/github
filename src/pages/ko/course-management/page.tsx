@@ -188,7 +188,7 @@ export default function CourseManagement() {
   const updateItineraryItem = (index: number, field: 'time' | 'activity', value: string) => {
     setNewCourse(prev => ({
       ...prev,
-      itinerary: prev.itinerary.map((item, i) => 
+      itinerary: prev.itinerary.map((item, i) =>
         i === index ? { ...item, [field]: value } : item
       )
     }));
@@ -214,8 +214,8 @@ export default function CourseManagement() {
   };
 
   const handleAcceptRequest = (requestId: number) => {
-    setRequests(prev => prev.map(request => 
-      request.id === requestId 
+    setRequests(prev => prev.map(request =>
+      request.id === requestId
         ? { ...request, status: 'accepted' }
         : request
     ));
@@ -224,8 +224,8 @@ export default function CourseManagement() {
   };
 
   const handleRejectRequest = (requestId: number) => {
-    setRequests(prev => prev.map(request => 
-      request.id === requestId 
+    setRequests(prev => prev.map(request =>
+      request.id === requestId
         ? { ...request, status: 'rejected' }
         : request
     ));
@@ -244,7 +244,7 @@ export default function CourseManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50 pb-20">
       {/* 상단 네비게이션 */}
       <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-sky-100 z-50">
         <div className="flex items-center justify-between px-4 py-3">
@@ -267,31 +267,28 @@ export default function CourseManagement() {
           <div className="flex bg-gray-100 rounded-xl p-1">
             <button
               onClick={() => setActiveTab('my-courses')}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === 'my-courses'
-                  ? 'bg-white text-sky-600 shadow-sm'
-                  : 'text-gray-600'
-              }`}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${activeTab === 'my-courses'
+                ? 'bg-white text-sky-600 shadow-sm'
+                : 'text-gray-600'
+                }`}
             >
               내 코스
             </button>
             <button
               onClick={() => setActiveTab('requests')}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === 'requests'
-                  ? 'bg-white text-sky-600 shadow-sm'
-                  : 'text-gray-600'
-              }`}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${activeTab === 'requests'
+                ? 'bg-white text-sky-600 shadow-sm'
+                : 'text-gray-600'
+                }`}
             >
               매칭 요청
             </button>
             <button
               onClick={() => setActiveTab('participants')}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === 'participants'
-                  ? 'bg-white text-sky-600 shadow-sm'
-                  : 'text-gray-600'
-              }`}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${activeTab === 'participants'
+                ? 'bg-white text-sky-600 shadow-sm'
+                : 'text-gray-600'
+                }`}
             >
               참가자
             </button>
@@ -310,11 +307,10 @@ export default function CourseManagement() {
                   <h3 className="text-lg font-bold text-gray-800 flex-1 mr-2">
                     {course.title}
                   </h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    course.status === 'active' 
-                      ? 'bg-green-100 text-green-600'
-                      : 'bg-orange-100 text-orange-600'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${course.status === 'active'
+                    ? 'bg-green-100 text-green-600'
+                    : 'bg-orange-100 text-orange-600'
+                    }`}>
                     {course.status === 'active' ? '모집중' : '마감'}
                   </span>
                 </div>
@@ -343,13 +339,13 @@ export default function CourseManagement() {
                 </div>
 
                 <div className="flex space-x-2">
-                  <button 
+                  <button
                     onClick={() => navigate('/course-edit')}
                     className="flex-1 bg-sky-50 text-sky-600 py-2 rounded-lg text-sm font-medium"
                   >
                     수정
                   </button>
-                  <button 
+                  <button
                     onClick={() => navigate('/course-detail')}
                     className="flex-1 bg-gray-50 text-gray-600 py-2 rounded-lg text-sm font-medium"
                   >
@@ -401,13 +397,13 @@ export default function CourseManagement() {
                 </div>
 
                 <div className="flex space-x-2">
-                  <button 
+                  <button
                     onClick={() => handleAcceptRequest(request.id)}
                     className="flex-1 bg-sky-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-sky-600 transition-colors"
                   >
                     수락
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleRejectRequest(request.id)}
                     className="flex-1 bg-gray-100 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                   >
@@ -416,7 +412,7 @@ export default function CourseManagement() {
                 </div>
               </div>
             ))}
-            
+
             {requests.filter(request => request.status === 'pending').length === 0 && (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -433,9 +429,9 @@ export default function CourseManagement() {
           <div className="px-4 space-y-4">
             {myCourses.map((course) => {
               const courseParticipants = getParticipantsByCourse(course.id);
-              
+
               if (courseParticipants.length === 0) return null;
-              
+
               return (
                 <div key={course.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                   <div className="flex items-center justify-between mb-4">
@@ -444,7 +440,7 @@ export default function CourseManagement() {
                       {courseParticipants.length}명 참가
                     </span>
                   </div>
-                  
+
                   <div className="space-y-3">
                     {courseParticipants.map((participant) => (
                       <div
@@ -514,7 +510,7 @@ export default function CourseManagement() {
                 </div>
               );
             })}
-            
+
             {participants.length === 0 && (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -545,11 +541,11 @@ export default function CourseManagement() {
               </div>
               <h3 className="text-lg font-bold text-gray-800 mb-2">참가자 삭제</h3>
               <p className="text-gray-600">
-                이 참가자를 코스에서 삭제하시겠습니까?<br/>
+                이 참가자를 코스에서 삭제하시겠습니까?<br />
                 삭제된 참가자는 복구할 수 없습니다.
               </p>
             </div>
-            
+
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowDeleteConfirm(null)}
@@ -574,14 +570,14 @@ export default function CourseManagement() {
           <div className="bg-white w-full max-h-[90vh] rounded-t-3xl overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3">
               <div className="flex items-center justify-between">
-                <button 
+                <button
                   onClick={() => setShowCreateForm(false)}
                   className="text-gray-600"
                 >
                   취소
                 </button>
                 <h2 className="text-lg font-bold text-gray-800">새 코스 만들기</h2>
-                <button 
+                <button
                   onClick={handleSubmit}
                   className="text-sky-500 font-medium"
                 >
@@ -747,11 +743,10 @@ export default function CourseManagement() {
                       key={language}
                       type="button"
                       onClick={() => handleLanguageToggle(language)}
-                      className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-                        newCourse.languages.includes(language)
-                          ? 'bg-sky-500 text-white'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}
+                      className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${newCourse.languages.includes(language)
+                        ? 'bg-sky-500 text-white'
+                        : 'bg-gray-100 text-gray-600'
+                        }`}
                     >
                       {language}
                     </button>
@@ -769,11 +764,10 @@ export default function CourseManagement() {
                       key={tag}
                       type="button"
                       onClick={() => handleTagToggle(tag)}
-                      className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-                        newCourse.tags.includes(tag)
-                          ? 'bg-sky-500 text-white'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}
+                      className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${newCourse.tags.includes(tag)
+                        ? 'bg-sky-500 text-white'
+                        : 'bg-gray-100 text-gray-600'
+                        }`}
                     >
                       {tag}
                     </button>
@@ -798,8 +792,7 @@ export default function CourseManagement() {
         </div>
       )}
 
-      {/* 하단 네비게이션 */}
-            <BottomNav />
+      <BottomNav />
     </div>
   );
 }
