@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import BottomNav from '../../components/BottomNav'; // ✅ 공통 하단 네비
+import BottomNav from '../KoBottomNav';
 
-export default function Chat() {
+export default function KoChat() {
   const [selectedChat, setSelectedChat] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState('');
 
@@ -317,7 +317,6 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* ✅ 공통 하단 네비게이션 (хуучин 4 товчтой блокыг НЭГ МӨРӨӨР сольсон) */}
       <BottomNav />
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import BottomNav from '../../components/BottomNav'; // ✅ 경로는 프로젝트 구조에 맞게 조정
+import BottomNav from '../KoBottomNav';
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);

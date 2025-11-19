@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BottomNav from '../KoBottomNav';
 
 export default function CourseManagement() {
   const navigate = useNavigate();
@@ -798,22 +799,7 @@ export default function CourseManagement() {
       )}
 
       {/* 하단 네비게이션 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="grid grid-cols-3 h-16">
-          <button className="flex flex-col items-center justify-center space-y-1 text-sky-500">
-            <i className="ri-map-pin-fill text-lg"></i>
-            <span className="text-xs font-medium">코스</span>
-          </button>
-          <button className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-            <i className="ri-message-line text-lg"></i>
-            <span className="text-xs">채팅</span>
-          </button>
-          <button className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-            <i className="ri-user-line text-lg"></i>
-            <span className="text-xs">프로필</span>
-          </button>
-        </div>
-      </div>
+            <BottomNav />
     </div>
   );
 }

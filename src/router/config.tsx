@@ -42,12 +42,24 @@ const routes: RouteObject[] = [
     element: <Matching />
   },
   {
+    path: '/ko/matching',
+    element: <KoMatching />
+  },
+  {
     path: '/chat',
     element: <Chat />
+  },
+    {
+    path: '/ko/chat',
+    element: <KoChat />
   },
   {
     path: '/profile',
     element: <Profile />
+  },
+  {
+    path: '/ko/profile',
+    element: <KoProfile />
   },
 
 
