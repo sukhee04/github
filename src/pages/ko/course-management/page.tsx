@@ -249,7 +249,7 @@ export default function CourseManagement() {
       <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-sky-100 z-50">
         <div className="flex items-center justify-between px-4 py-3">
           <button className="w-8 h-8 flex items-center justify-center">
-            <i className="ri-arrow-left-line text-gray-600 text-lg"></i>
+            {/* <i className="ri-arrow-left-line text-gray-600 text-lg"></i> */}
           </button>
           <h1 className="text-lg font-bold text-gray-800" style={{ fontFamily: 'Pretendard, sans-serif' }}>
             코스 관리

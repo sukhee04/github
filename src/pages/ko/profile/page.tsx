@@ -53,11 +53,12 @@ export default function Profile() {
             <div className="w-8 h-8 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center">
               <i className="ri-user-line text-white text-lg"></i>
             </div>
+
             <h1 className="text-lg font-bold text-gray-800" style={{ fontFamily: 'Pretendard, sans-serif' }}>
               프로필
             </h1>
           </div>
-          <button 
+          <button
             onClick={() => isEditing ? handleSave() : setIsEditing(true)}
             className="text-sky-500 text-sm font-medium"
           >
@@ -106,11 +107,10 @@ export default function Profile() {
                       ({userInfo.reviews})
                     </span>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    userInfo.userType === 'korean' 
-                      ? 'bg-sky-100 text-sky-600'
-                      : 'bg-emerald-100 text-emerald-600'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${userInfo.userType === 'korean'
+                    ? 'bg-sky-100 text-sky-600'
+                    : 'bg-emerald-100 text-emerald-600'
+                    }`}>
                     {userInfo.userType === 'korean' ? '한국 학생' : '유학생'}
                   </span>
                 </div>
@@ -164,11 +164,10 @@ export default function Profile() {
                     key={language}
                     type="button"
                     onClick={() => handleLanguageToggle(language)}
-                    className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-                      userInfo.languages.includes(language)
-                        ? 'bg-sky-500 text-white'
-                        : 'bg-gray-100 text-gray-600'
-                    }`}
+                    className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${userInfo.languages.includes(language)
+                      ? 'bg-sky-500 text-white'
+                      : 'bg-gray-100 text-gray-600'
+                      }`}
                   >
                     {language}
                   </button>
@@ -200,11 +199,10 @@ export default function Profile() {
                     key={interest}
                     type="button"
                     onClick={() => handleInterestToggle(interest)}
-                    className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-                      userInfo.interests.includes(interest)
-                        ? 'bg-sky-500 text-white'
-                        : 'bg-gray-100 text-gray-600'
-                    }`}
+                    className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${userInfo.interests.includes(interest)
+                      ? 'bg-sky-500 text-white'
+                      : 'bg-gray-100 text-gray-600'
+                      }`}
                   >
                     {interest}
                   </button>
@@ -235,9 +233,9 @@ export default function Profile() {
               </div>
               <i className="ri-arrow-right-s-line text-gray-400"></i>
             </button>
-            
+
             <div className="border-t border-gray-100"></div>
-            
+
             <button className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-center space-x-3">
                 <i className="ri-shield-line text-gray-400 text-lg"></i>
@@ -245,9 +243,9 @@ export default function Profile() {
               </div>
               <i className="ri-arrow-right-s-line text-gray-400"></i>
             </button>
-            
+
             <div className="border-t border-gray-100"></div>
-            
+
             <button className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-center space-x-3">
                 <i className="ri-question-line text-gray-400 text-lg"></i>
@@ -255,9 +253,9 @@ export default function Profile() {
               </div>
               <i className="ri-arrow-right-s-line text-gray-400"></i>
             </button>
-            
+
             <div className="border-t border-gray-100"></div>
-            
+
             <button className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-center space-x-3">
                 <i className="ri-logout-circle-line text-red-400 text-lg"></i>
