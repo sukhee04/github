@@ -59,7 +59,11 @@ export default function Auth() {
 
         // 예시: localStorage에 간단히 저장
         // localStorage.setItem("currentUser", JSON.stringify(user));
-        navigate("/", { replace: true });
+        if (user["userType"] == "korean") {
+          navigate("/course-management", { replace: true });
+        } else {
+          navigate("/course-list", { replace: true });
+        }
       } catch (err) {
         console.error("로그인 중 오류:", err);
         alert("로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
@@ -86,8 +90,12 @@ export default function Auth() {
 
         // 필요하면 여기서 form 초기화
         // setFormData(...); setUserType(null); 등
+        if (userType == "korean") {
+          navigate("/course-management", { replace: true });
 
-        navigate("/", { replace: true });
+        } else {
+          navigate("/course-list", { replace: true });
+        }
       } catch (err) {
         console.error("회원가입 실패:", err);
         alert("회원가입 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
