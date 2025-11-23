@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from 'react-router-dom';
 
+import { userRepository } from "../../repository/userRepository";
+
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [userType, setUserType] = useState<'korean' | 'international' | null>(null);
@@ -37,22 +39,61 @@ export default function Auth() {
     }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // 🧠 эндээс login / signup API-г дуудахаар төлөвлөж болно
     if (isLogin) {
-      console.log('로그인 시도:', { ...formData, userType });
-      // TODO: 로그인 API 호출 → 성공시 토큰 저장 гэх мэт
+      // 로그인 로직
+      try {
+        const user = await userRepository.login(
+          formData.email,
+          formData.password
+        );
+
+        if (!user) {
+          alert("이메일 또는 비밀번호가 올바르지 않습니다.");
+          return;
+        }
+
+        console.log("로그인 성공:", user);
+
+        // 예시: localStorage에 간단히 저장
+        // localStorage.setItem("currentUser", JSON.stringify(user));
+        navigate("/", { replace: true });
+      } catch (err) {
+        console.error("로그인 중 오류:", err);
+        alert("로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      }
     } else {
-      console.log('회원가입 시도:', { ...formData, userType });
-      // TODO: 회원가입 API 호출 → 성공시 자동 로그인 처리 гэх мэт
+      if (!userType) {
+        alert("한국 학생 / 유학생 중 하나를 선택해주세요.");
+        return;
+      }
+
+      try {
+        const userId = await userRepository.createUser({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+          university: formData.university,
+          languages: formData.languages,
+          interests: formData.interests,
+          userType, // 'korean' | 'international'
+        });
+
+        console.log("회원가입 완료, userId:", userId);
+        alert("회원가입이 완료되었습니다!");
+
+        // 필요하면 여기서 form 초기화
+        // setFormData(...); setUserType(null); 등
+
+        navigate("/", { replace: true });
+      } catch (err) {
+        console.error("회원가입 실패:", err);
+        alert("회원가입 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      }
     }
-
-    // ✅ 로그인/회원가입 амжилттай гэж үзээд шууд нүүр хуудас руу шилжүүлнэ
-    navigate('/', { replace: true });
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50">
       {/* 상단 네비게이션 */}
@@ -253,11 +294,10 @@ export default function Auth() {
                           key={language}
                           type="button"
                           onClick={() => handleLanguageToggle(language)}
-                          className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-                            formData.languages.includes(language)
-                              ? 'bg-sky-500 text-white'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
+                          className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${formData.languages.includes(language)
+                            ? 'bg-sky-500 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
                         >
                           {language}
                         </button>
@@ -275,11 +315,10 @@ export default function Auth() {
                           key={interest}
                           type="button"
                           onClick={() => handleInterestToggle(interest)}
-                          className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-                            formData.interests.includes(interest)
-                              ? 'bg-sky-500 text-white'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
+                          className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${formData.interests.includes(interest)
+                            ? 'bg-sky-500 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
                         >
                           {interest}
                         </button>
