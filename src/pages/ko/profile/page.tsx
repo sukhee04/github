@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import BottomNav from '../KoBottomNav';
+import { StorageManager } from '../../auth/storageManager';
+import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
+  const navigate = useNavigate(); 
   const [isEditing, setIsEditing] = useState(false);
   const [userInfo, setUserInfo] = useState({
     name: '김민지',
@@ -42,6 +45,11 @@ export default function Profile() {
     setIsEditing(false);
     console.log('Profile updated:', userInfo);
   };
+
+  const logout = () =>{
+    StorageManager.clear()
+    navigate('/auth')
+  }
 
   return (
     // ✅ pb-20 추가: 아래 BottomNav 때문에 내용이 가려지지 않도록 padding
@@ -256,7 +264,9 @@ export default function Profile() {
 
             <div className="border-t border-gray-100"></div>
 
-            <button className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+            <button 
+            onClick={() => logout()}
+            className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-center space-x-3">
                 <i className="ri-logout-circle-line text-red-400 text-lg"></i>
                 <span className="text-red-600">로그아웃</span>

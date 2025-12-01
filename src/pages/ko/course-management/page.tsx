@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '../KoBottomNav';
+import { StorageManager } from '../../auth/storageManager';
+import { courseRepository } from '../../../repository/courseRepository';
+import { scheduleRepository } from '../../../repository/scheduleRepository';
 
 export default function CourseManagement() {
   const navigate = useNavigate();
@@ -8,6 +11,8 @@ export default function CourseManagement() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [newCourse, setNewCourse] = useState({
+    userId: '',
+    place: '',
     title: '',
     description: '',
     price: '',
@@ -20,6 +25,69 @@ export default function CourseManagement() {
     requirements: '',
     itinerary: [{ time: '', activity: '' }]
   });
+
+  type MyCourseCard = {
+    id: string;
+    title: string;
+    status: 'active' | 'full';
+    participants: number;
+    maxParticipants: number;
+    date: string;
+    price: string;
+    requests: number;
+  };
+
+  const [myCourses, setMyCourses] = useState<MyCourseCard[]>([]);
+
+  const user = StorageManager.get("user");
+
+      const init = async () => {
+      if (user == null) {
+        StorageManager.clear();
+        navigate("/auth");
+        return;
+      }
+
+      console.log(`userId: ${user.id}`);
+      console.log(`userName: ${user.name}`);
+
+      const courses = await courseRepository.getCoursesByUser(user.id);
+
+      if (!courses || courses.length === 0) {
+        console.log("코스 없음");
+        setMyCourses([]);   // 🔹 빈 배열로 세팅
+      } else {
+        console.log("코스 목록:", courses);
+
+        // Firestore에서 가져온 형태를 화면에서 쓰기 좋은 형태로 매핑
+        const mapped = courses.map((c: any) => ({
+          id: c.id,
+          title: c.title,
+          status: (c.curNum >= c.maxParticipants ? 'full' : 'active') as 'active' | 'full',
+          participants: c.participants,
+          maxParticipants: c.maxParticipants,
+          date: c.date, // 필요하면 여기서 포맷팅
+          price: c.price === 0 ? "무료" : `${c.price.toLocaleString()}원`,
+          requests: 0, // 아직 요청 데이터 없으니 0으로
+        }));
+
+        setMyCourses(mapped);
+
+        const storedUser = StorageManager.get("user");
+        if (storedUser) {
+          console.log("유저:", storedUser.name);
+        }
+      }
+    };
+
+  useEffect(() => {
+    init();
+  }, [navigate]);
+
+
+
+
+
   const [requests, setRequests] = useState([
     {
       id: 1,
@@ -63,7 +131,7 @@ export default function CourseManagement() {
   const [participants, setParticipants] = useState([
     {
       id: 1,
-      courseId: 1,
+      courseId: "1",
       courseTitle: '경복궁과 북촌 한옥마을 투어',
       userName: '에밀리 존슨',
       university: '연세대학교 교환학생',
@@ -79,7 +147,7 @@ export default function CourseManagement() {
     },
     {
       id: 2,
-      courseId: 1,
+      courseId: "1",
       courseTitle: '경복궁과 북촌 한옥마을 투어',
       userName: '다니엘 김',
       university: '서울대학교 교환학생',
@@ -95,7 +163,7 @@ export default function CourseManagement() {
     },
     {
       id: 3,
-      courseId: 2,
+      courseId: "2",
       courseTitle: '홍대 야시장과 K-POP 체험',
       userName: '마리아 가르시아',
       university: '고려대학교 교환학생',
@@ -111,7 +179,7 @@ export default function CourseManagement() {
     },
     {
       id: 4,
-      courseId: 2,
+      courseId: "2",
       courseTitle: '홍대 야시장과 K-POP 체험',
       userName: '타카시 야마다',
       university: '성균관대학교 교환학생',
@@ -127,28 +195,28 @@ export default function CourseManagement() {
     }
   ]);
 
-  const myCourses = [
-    {
-      id: 1,
-      title: '경복궁과 북촌 한옥마을 투어',
-      status: 'active',
-      participants: 3,
-      maxParticipants: 5,
-      date: '3월 15일',
-      price: '무료',
-      requests: 7
-    },
-    {
-      id: 2,
-      title: '홍대 야시장과 K-POP 체험',
-      status: 'full',
-      participants: 4,
-      maxParticipants: 4,
-      date: '3월 18일',
-      price: '15,000원',
-      requests: 12
-    }
-  ];
+  // const myCourses = [
+  //   {
+  //     id: 1,
+  //     title: '경복궁과 북촌 한옥마을 투어',
+  //     status: 'active',
+  //     participants: 3,
+  //     maxParticipants: 5,
+  //     date: '3월 15일',
+  //     price: '무료',
+  //     requests: 7
+  //   },
+  //   {
+  //     id: 2,
+  //     title: '홍대 야시장과 K-POP 체험',
+  //     status: 'full',
+  //     participants: 4,
+  //     maxParticipants: 4,
+  //     date: '3월 18일',
+  //     price: '15,000원',
+  //     requests: 12
+  //   }
+  // ];
 
   const availableLanguages = ['한국어', '영어', '중국어', '일본어'];
   const availableTags = ['문화체험', '음식', '쇼핑', 'K-POP', '역사', '자연', '예술'];
@@ -194,11 +262,50 @@ export default function CourseManagement() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('New course:', newCourse);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  console.log('New course:', newCourse);
+
+  if (!user) {
+    alert("로그인이 필요합니다.");
+    navigate("/auth");
+    return;
+  }
+
+  try {
+    // 1) 코스 생성
+    const newCourseId = await courseRepository.createCourse({
+      userId: user.id,
+      title: newCourse.title,
+      description: newCourse.description,
+      date: newCourse.date,
+      place: newCourse.location,
+      maxParticipants: Number(newCourse.maxParticipants),
+      price: newCourse.price === "무료" ? 0 : Number(newCourse.price),
+      languages: newCourse.languages,
+      tags: newCourse.tags,
+      requirements: newCourse.requirements,
+    });
+
+    console.log("새로 생성된 코스 ID:", newCourseId);
+
+    // 2) 일정 저장 (상세 일정 → schedule 컬렉션)
+    await Promise.all(
+      newCourse.itinerary.map((t) =>
+        scheduleRepository.createSchedule({
+          courseId: newCourseId,
+          // 날짜 + 시각을 합쳐서 하나의 문자열로 저장하고 싶으면 이렇게
+          time: `${newCourse.date} ${t.time}`,
+          description: t.activity,
+        })
+      )
+    );
+
+    // 3) 폼 리셋 + 리스트 새로고침
     setShowCreateForm(false);
     setNewCourse({
+      userId: '',
+      place: '',
       title: '',
       description: '',
       price: '',
@@ -209,9 +316,16 @@ export default function CourseManagement() {
       languages: [],
       tags: [],
       requirements: '',
-      itinerary: [{ time: '', activity: '' }]
+      itinerary: [{ time: '', activity: '' }],
     });
-  };
+
+    await init(); // 코스 목록 다시 불러오기
+  } catch (err) {
+    console.error("코스 생성/일정 저장 실패:", err);
+    alert("코스 생성 중 오류가 발생했습니다.");
+  }
+};
+
 
   const handleAcceptRequest = (requestId: number) => {
     setRequests(prev => prev.map(request =>
@@ -239,7 +353,7 @@ export default function CourseManagement() {
     alert('참가자가 삭제되었습니다.');
   };
 
-  const getParticipantsByCourse = (courseId: number) => {
+  const getParticipantsByCourse = (courseId: String) => {
     return participants.filter(p => p.courseId === courseId);
   };
 
@@ -298,64 +412,79 @@ export default function CourseManagement() {
         {/* 내 코스 탭 */}
         {activeTab === 'my-courses' && (
           <div className="px-4 space-y-4">
-            {myCourses.map((course) => (
-              <div
-                key={course.id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-lg font-bold text-gray-800 flex-1 mr-2">
-                    {course.title}
-                  </h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${course.status === 'active'
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-orange-100 text-orange-600'
-                    }`}>
-                    {course.status === 'active' ? '모집중' : '마감'}
-                  </span>
+            {myCourses.length === 0 ? (
+              // 🔹 코스가 하나도 없을 때
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i className="ri-map-pin-line text-gray-400 text-2xl"></i>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="flex items-center space-x-2">
-                    <i className="ri-calendar-line text-gray-400 text-sm"></i>
-                    <span className="text-sm text-gray-600">{course.date}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <i className="ri-money-dollar-circle-line text-gray-400 text-sm"></i>
-                    <span className="text-sm text-gray-600">{course.price}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <i className="ri-group-line text-gray-400 text-sm"></i>
-                    <span className="text-sm text-gray-600">
-                      {course.participants}/{course.maxParticipants}명
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <i className="ri-notification-line text-gray-400 text-sm"></i>
-                    <span className="text-sm text-gray-600">
-                      요청 {course.requests}건
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => navigate('/course-edit')}
-                    className="flex-1 bg-sky-50 text-sky-600 py-2 rounded-lg text-sm font-medium"
-                  >
-                    수정
-                  </button>
-                  <button
-                    onClick={() => navigate('/course-detail')}
-                    className="flex-1 bg-gray-50 text-gray-600 py-2 rounded-lg text-sm font-medium"
-                  >
-                    상세보기
-                  </button>
-                </div>
+                <p className="text-gray-500">아직 만든 코스가 없습니다</p>
+                <p className="text-sm text-gray-400 mt-1">오른쪽 아래 + 버튼으로 첫 코스를 만들어보세요</p>
               </div>
-            ))}
+            ) : (
+              // 🔹 코스가 있을 때
+              myCourses.map((course) => (
+                <div
+                  key={course.id}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-lg font-bold text-gray-800 flex-1 mr-2">
+                      {course.title}
+                    </h3>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${course.status === 'active'
+                          ? 'bg-green-100 text-green-600'
+                          : 'bg-orange-100 text-orange-600'
+                        }`}
+                    >
+                      {course.status === 'active' ? '모집중' : '마감'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="flex items-center space-x-2">
+                      <i className="ri-calendar-line text-gray-400 text-sm"></i>
+                      <span className="text-sm text-gray-600">{course.date}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <i className="ri-money-dollar-circle-line text-gray-400 text-sm"></i>
+                      <span className="text-sm text-gray-600">{course.price}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <i className="ri-group-line text-gray-400 text-sm"></i>
+                      <span className="text-sm text-gray-600">
+                        {course.participants}/{course.maxParticipants}명
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <i className="ri-notification-line text-gray-400 text-sm"></i>
+                      <span className="text-sm text-gray-600">
+                        요청 {course.requests}건
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => navigate('/course-edit')}
+                      className="flex-1 bg-sky-50 text-sky-600 py-2 rounded-lg text-sm font-medium"
+                    >
+                      수정
+                    </button>
+                    <button
+                      onClick={() => navigate('/course-detail')}
+                      className="flex-1 bg-gray-50 text-gray-600 py-2 rounded-lg text-sm font-medium"
+                    >
+                      상세보기
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
+
 
         {/* 매칭 요청 탭 */}
         {activeTab === 'requests' && (

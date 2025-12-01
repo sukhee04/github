@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { useNavigate } from 'react-router-dom';
 
 import { userRepository } from "../../repository/userRepository";
+import { StorageManager } from "./storageManager";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,7 +17,7 @@ export default function Auth() {
     interests: [] as string[]
   });
 
-  const navigate = useNavigate(); // ✅ navigate ашиглах бэлтгэл
+  const navigate = useNavigate(); 
 
   const availableLanguages = ['한국어', '영어', '중국어', '일본어', '스페인어', '프랑스어'];
   const availableInterests = ['문화체험', '음식', '쇼핑', 'K-POP', '역사', '자연', '예술', '스포츠'];
@@ -55,10 +56,11 @@ export default function Auth() {
           return;
         }
 
-        console.log("로그인 성공:", user);
+        console.log("로그인 성공:");
 
-        // 예시: localStorage에 간단히 저장
-        // localStorage.setItem("currentUser", JSON.stringify(user));
+        // 저장
+        StorageManager.save("user", user, 60 * 60 * 1000)
+
         if (user["userType"] == "korean") {
           navigate("/course-management", { replace: true });
         } else {
