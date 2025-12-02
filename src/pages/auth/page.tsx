@@ -1,98 +1,164 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+
+import { auth, db } from "../../firebase";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
-  const [userType, setUserType] = useState<'korean' | 'international' | null>(null);
+  const [userType, setUserType] = useState<"korean" | "international" | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    university: '',
+    email: "",
+    password: "",
+    name: "",
+    university: "",
     languages: [] as string[],
-    interests: [] as string[]
+    interests: [] as string[],
   });
 
-  const navigate = useNavigate(); // ✅ navigate ашиглах бэлтгэл
+  const navigate = useNavigate();
 
-  const availableLanguages = ['한국어', '영어', '중국어', '일본어', '스페인어', '프랑스어'];
-  const availableInterests = ['문화체험', '음식', '쇼핑', 'K-POP', '역사', '자연', '예술', '스포츠'];
+  const availableLanguages = ["한국어", "영어", "중국어", "일본어", "스페인어", "프랑스어"];
+  const availableInterests = ["문화체험", "음식", "쇼핑", "K-POP", "역사", "자연", "예술", "스포츠"];
 
   const handleLanguageToggle = (language: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       languages: prev.languages.includes(language)
-        ? prev.languages.filter(l => l !== language)
-        : [...prev.languages, language]
+        ? prev.languages.filter((l) => l !== language)
+        : [...prev.languages, language],
     }));
   };
 
   const handleInterestToggle = (interest: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       interests: prev.interests.includes(interest)
-        ? prev.interests.filter(i => i !== interest)
-        : [...prev.interests, interest]
+        ? prev.interests.filter((i) => i !== interest)
+        : [...prev.interests, interest],
     }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (loading) return;
 
-    // 🧠 эндээс login / signup API-г дуудахаар төлөвлөж болно
-    if (isLogin) {
-      console.log('로그인 시도:', { ...formData, userType });
-      // TODO: 로그인 API 호출 → 성공시 토큰 저장 гэх мэт
-    } else {
-      console.log('회원가입 시도:', { ...formData, userType });
-      // TODO: 회원가입 API 호출 → 성공시 자동 로그인 처리 гэх мэт
+    setLoading(true);
+
+    try {
+      // -------------------------------------
+      // ✅ LOGIN
+      // -------------------------------------
+      if (isLogin) {
+        const res = await signInWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
+
+        console.log("로그인 성공 UID:", res.user.uid);
+        navigate("/", { replace: true });
+        return;
+      }
+
+      // -------------------------------------
+      // ✅ SIGNUP
+      // -------------------------------------
+      if (!userType) {
+        alert("사용자 유형을 선택하세요.");
+        return;
+      }
+
+      if (!formData.name.trim() || !formData.university.trim()) {
+        alert("이름, 대학교를 입력하세요.");
+        return;
+      }
+
+      const res = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      // ✅ Auth profile дээр нэр хадгална (chat дээр хэрэгтэй)
+      await updateProfile(res.user, {
+        displayName: formData.name,
+      });
+
+      // ✅ Firestore users collection-д хадгална
+      await setDoc(doc(db, "users", res.user.uid), {
+        uid: res.user.uid,
+        email: formData.email,
+        name: formData.name,
+        university: formData.university,
+        userType,
+        languages: formData.languages,
+        interests: formData.interests,
+        createdAt: serverTimestamp(),
+      });
+
+      console.log("회원가입 성공 UID:", res.user.uid);
+      navigate("/", { replace: true });
+    } catch (error: any) {
+      console.error(error);
+
+      // Алдааг арай ойлгомжтой харуулах
+      const msg =
+        error?.code === "auth/email-already-in-use"
+          ? "이미 사용중인 이메일입니다."
+          : error?.code === "auth/invalid-credential"
+          ? "이메일 또는 비밀번호가 틀렸습니다."
+          : error?.code === "auth/weak-password"
+          ? "비밀번호는 6자 이상이어야 합니다."
+          : "오류가 발생했습니다: " + error.message;
+
+      alert(msg);
+    } finally {
+      setLoading(false);
     }
-
-    // ✅ 로그인/회원가입 амжилттай гэж үзээд шууд нүүр хуудас руу шилжүүлнэ
-    navigate('/', { replace: true });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50">
-      {/* 상단 네비게이션 */}
+      {/* 상단 네비 */}
       <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-sky-100 z-50">
         <div className="flex items-center justify-between px-4 py-3">
           <button
             className="w-8 h-8 flex items-center justify-center"
-            onClick={() => navigate(-1)} // ✅ арын хуудас руу буцах (эсвэл navigate('/') гэж болно)
+            onClick={() => navigate(-1)}
           >
             <i className="ri-arrow-left-line text-gray-600 text-lg"></i>
           </button>
-          <h1
-            className="text-lg font-bold text-gray-800"
-            style={{ fontFamily: 'Pretendard, sans-serif' }}
-          >
-            {isLogin ? '로그인' : '회원가입'}
+          <h1 className="text-lg font-bold text-gray-800">
+            {isLogin ? "로그인" : "회원가입"}
           </h1>
           <div className="w-8"></div>
         </div>
       </div>
 
       <div className="pt-16 px-4 py-6">
-        {/* 로고 및 환영 메시지 */}
+        {/* Лого */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <i className="ri-global-line text-white text-2xl"></i>
           </div>
-          <h2
-            className="text-2xl font-bold text-gray-800 mb-2"
-            style={{ fontFamily: 'Pretendard, sans-serif' }}
-          >
-            문화친구
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">문화친구</h2>
           <p className="text-gray-600">
-            {isLogin ? '다시 만나서 반가워요!' : '새로운 문화 친구들과 만나보세요'}
+            {isLogin ? "다시 만나서 반가워요!" : "새로운 문화 친구들과 만나보세요"}
           </p>
         </div>
 
+        {/* FORM */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 사용자 유형 선택 (회원가입 시에만) */}
+          {/* 회원가입 → 역할 сонголт */}
           {!isLogin && !userType && (
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-gray-800 text-center mb-6">
@@ -101,7 +167,7 @@ export default function Auth() {
 
               <button
                 type="button"
-                onClick={() => setUserType('korean')}
+                onClick={() => setUserType("korean")}
                 className="w-full p-6 bg-white rounded-2xl border-2 border-gray-200 hover:border-sky-300 transition-colors"
               >
                 <div className="flex items-center space-x-4">
@@ -119,7 +185,7 @@ export default function Auth() {
 
               <button
                 type="button"
-                onClick={() => setUserType('international')}
+                onClick={() => setUserType("international")}
                 className="w-full p-6 bg-white rounded-2xl border-2 border-gray-200 hover:border-sky-300 transition-colors"
               >
                 <div className="flex items-center space-x-4">
@@ -137,9 +203,10 @@ export default function Auth() {
             </div>
           )}
 
-          {/* 기본 정보 입력 */}
+          {/* Логин эсвэл Signup form */}
           {(isLogin || userType) && (
             <div className="space-y-4">
+              {/* EMAIL */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   이메일
@@ -148,14 +215,15 @@ export default function Auth() {
                   type="email"
                   value={formData.email}
                   onChange={(e) =>
-                    setFormData(prev => ({ ...prev, email: e.target.value }))
+                    setFormData((prev) => ({ ...prev, email: e.target.value }))
                   }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                  placeholder="이메일을 입력하세요"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  placeholder="이메일"
                   required
                 />
               </div>
 
+              {/* PASSWORD */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   비밀번호
@@ -164,16 +232,18 @@ export default function Auth() {
                   type="password"
                   value={formData.password}
                   onChange={(e) =>
-                    setFormData(prev => ({ ...prev, password: e.target.value }))
+                    setFormData((prev) => ({ ...prev, password: e.target.value }))
                   }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                  placeholder="비밀번호를 입력하세요"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  placeholder="비밀번호"
                   required
                 />
               </div>
 
+              {/* SIGNUP нэмэлт талбарууд */}
               {!isLogin && (
                 <>
+                  {/* NAME */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       이름
@@ -182,14 +252,14 @@ export default function Auth() {
                       type="text"
                       value={formData.name}
                       onChange={(e) =>
-                        setFormData(prev => ({ ...prev, name: e.target.value }))
+                        setFormData((prev) => ({ ...prev, name: e.target.value }))
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                      placeholder="이름을 입력하세요"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
                       required
                     />
                   </div>
 
+                  {/* UNIVERSITY */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       대학교
@@ -198,65 +268,31 @@ export default function Auth() {
                       type="text"
                       value={formData.university}
                       onChange={(e) =>
-                        setFormData(prev => ({
+                        setFormData((prev) => ({
                           ...prev,
-                          university: e.target.value
+                          university: e.target.value,
                         }))
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                      placeholder="대학교를 입력하세요"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
                       required
                     />
                   </div>
 
-                  {/* 파일 업로드 */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {userType === 'korean' ? '재학증명서' : '여권 사본'}
-                    </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-sky-400 transition-colors">
-                      <input
-                        type="file"
-                        accept="image/*,.pdf"
-                        className="hidden"
-                        id="document-upload"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            console.log('File selected:', file.name);
-                          }
-                        }}
-                      />
-                      <label htmlFor="document-upload" className="cursor-pointer">
-                        <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <i className="ri-upload-cloud-line text-sky-500 text-xl"></i>
-                        </div>
-                        <p className="text-gray-600 text-sm mb-1">
-                          {userType === 'korean'
-                            ? '재학증명서를 업로드하세요'
-                            : '여권 사본을 업로드하세요'}
-                        </p>
-                        <p className="text-gray-400 text-xs">
-                          JPG, PNG, PDF 파일 (최대 5MB)
-                        </p>
-                      </label>
-                    </div>
-                  </div>
-
+                  {/* LANGUAGES */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       사용 가능한 언어
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {availableLanguages.map(language => (
+                      {availableLanguages.map((language) => (
                         <button
                           key={language}
                           type="button"
                           onClick={() => handleLanguageToggle(language)}
                           className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
                             formData.languages.includes(language)
-                              ? 'bg-sky-500 text-white'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              ? "bg-sky-500 text-white"
+                              : "bg-gray-100 text-gray-600"
                           }`}
                         >
                           {language}
@@ -265,20 +301,21 @@ export default function Auth() {
                     </div>
                   </div>
 
+                  {/* INTERESTS */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       관심사
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {availableInterests.map(interest => (
+                      {availableInterests.map((interest) => (
                         <button
                           key={interest}
                           type="button"
                           onClick={() => handleInterestToggle(interest)}
                           className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
                             formData.interests.includes(interest)
-                              ? 'bg-sky-500 text-white'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              ? "bg-sky-500 text-white"
+                              : "bg-gray-100 text-gray-600"
                           }`}
                         >
                           {interest}
@@ -289,11 +326,17 @@ export default function Auth() {
                 </>
               )}
 
+              {/* SUBMIT BUTTON */}
               <button
                 type="submit"
-                className="w-full bg-sky-500 text-white py-3 rounded-xl font-medium hover:bg-sky-600 transition-colors mt-6"
+                disabled={loading}
+                className={`w-full py-3 rounded-xl font-medium transition-colors mt-6 ${
+                  loading
+                    ? "bg-gray-300 text-gray-500"
+                    : "bg-sky-500 text-white hover:bg-sky-600"
+                }`}
               >
-                {isLogin ? '로그인' : '회원가입'}
+                {loading ? "처리중..." : isLogin ? "로그인" : "회원가입"}
               </button>
 
               <div className="text-center">
@@ -303,19 +346,19 @@ export default function Auth() {
                     setIsLogin(!isLogin);
                     setUserType(null);
                     setFormData({
-                      email: '',
-                      password: '',
-                      name: '',
-                      university: '',
+                      email: "",
+                      password: "",
+                      name: "",
+                      university: "",
                       languages: [],
-                      interests: []
+                      interests: [],
                     });
                   }}
                   className="text-sky-500 text-sm font-medium"
                 >
                   {isLogin
-                    ? '계정이 없으신가요? 회원가입'
-                    : '이미 계정이 있으신가요? 로그인'}
+                    ? "계정이 없으신가요? 회원가입"
+                    : "이미 계정이 있으신가요? 로그인"}
                 </button>
               </div>
             </div>
