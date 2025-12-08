@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '../../components/BottomNav'; // ✅ 공통 하단 네비게이션
+import { courseRepository, type Course } from '../../repository/courseRepository';
 
 export default function CourseList() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('popular');
+
+  const [courses, setCourses] = useState<(Course & { id: string })[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const categories = [
     { name: '전체', key: 'all', icon: 'ri-apps-line' },
@@ -24,104 +28,143 @@ export default function CourseList() {
     { name: '평점순', key: 'rating' }
   ];
 
-  const courses = [
-    {
-      id: 1,
-      title: '경복궁과 북촌 한옥마을 투어',
-      host: '김민지',
-      university: '서울대학교',
-      rating: 4.9,
-      reviews: 23,
-      price: '무료',
-      image: 'https://readdy.ai/api/search-image?query=Beautiful%20traditional%20Korean%20palace%20Gyeongbokgung%20with%20colorful%20hanbok%20people%20walking%2C%20bright%20sunny%20day%2C%20cultural%20heritage%20site%2C%20vibrant%20colors%2C%20travel%20photography%20style%2C%20high%20quality%2C%20detailed%20architecture&width=300&height=200&seq=courselist1&orientation=landscape',
-      tags: ['문화체험', '역사', '사진촬영'],
-      languages: ['한국어', '영어'],
-      date: '3월 15일',
-      category: 'culture'
-    },
-    {
-      id: 2,
-      title: '홍대 야시장과 K-POP 체험',
-      host: '박서준',
-      university: '연세대학교',
-      rating: 4.8,
-      reviews: 31,
-      price: '15,000원',
-      image: 'https://readdy.ai/api/search-image?query=Vibrant%20Korean%20night%20market%20in%20Hongdae%20with%20colorful%20street%20food%20stalls%2C%20neon%20lights%2C%20young%20people%20enjoying%20food%2C%20lively%20atmosphere%2C%20urban%20nightlife%2C%20warm%20lighting%2C%20cultural%20experience&width=300&height=200&seq=courselist2&orientation=landscape',
-      tags: ['음식', 'K-POP', '야시장'],
-      languages: ['한국어', '영어', '중국어'],
-      date: '3월 18일',
-      category: 'kpop'
-    },
-    {
-      id: 3,
-      title: '제주도 올레길 트레킹',
-      host: '이하늘',
-      university: '제주대학교',
-      rating: 5.0,
-      reviews: 18,
-      price: '25,000원',
-      image: 'https://readdy.ai/api/search-image?query=Beautiful%20Jeju%20Island%20Olle%20trail%20with%20ocean%20view%2C%20green%20hills%2C%20walking%20path%2C%20clear%20blue%20sky%2C%20peaceful%20nature%20scenery%2C%20hiking%20adventure%2C%20Korean%20landscape%2C%20travel%20destination&width=300&height=200&seq=courselist3&orientation=landscape',
-      tags: ['자연', '트레킹', '힐링'],
-      languages: ['한국어', '영어'],
-      date: '3월 22일',
-      category: 'nature'
-    },
-    {
-      id: 4,
-      title: '부산 해운대와 감천문화마을',
-      host: '최유진',
-      university: '부산대학교',
-      rating: 4.7,
-      reviews: 27,
-      price: '20,000원',
-      image: 'https://readdy.ai/api/search-image?query=Colorful%20Gamcheon%20Culture%20Village%20in%20Busan%20with%20rainbow%20houses%20on%20hillside%2C%20artistic%20murals%2C%20coastal%20city%20view%2C%20bright%20sunny%20day%2C%20Korean%20cultural%20landmark%2C%20vibrant%20community%20art&width=300&height=200&seq=courselist4&orientation=landscape',
-      tags: ['해변', '문화마을', '예술'],
-      languages: ['한국어', '영어', '일본어'],
-      date: '3월 25일',
-      category: 'culture'
-    },
-    {
-      id: 5,
-      title: '명동 쇼핑과 한국 뷰티 체험',
-      host: '정수아',
-      university: '이화여자대학교',
-      rating: 4.6,
-      reviews: 19,
-      price: '10,000원',
-      image: 'https://readdy.ai/api/search-image?query=Busy%20Myeongdong%20shopping%20street%20in%20Seoul%20with%20Korean%20cosmetics%20stores%2C%20fashion%20shops%2C%20bright%20neon%20signs%2C%20crowded%20pedestrian%20area%2C%20modern%20urban%20shopping%20district%2C%20vibrant%20commercial%20area&width=300&height=200&seq=courselist5&orientation=landscape',
-      tags: ['쇼핑', '뷰티', '패션'],
-      languages: ['한국어', '영어', '중국어'],
-      date: '3월 28일',
-      category: 'shopping'
-    },
-    {
-      id: 6,
-      title: '한강 피크닉과 치킨 파티',
-      host: '김태현',
-      university: '고려대학교',
-      rating: 4.5,
-      reviews: 15,
-      price: '18,000원',
-      image: 'https://readdy.ai/api/search-image?query=Han%20River%20picnic%20in%20Seoul%20with%20people%20enjoying%20fried%20chicken%20and%20beer%2C%20beautiful%20river%20view%2C%20city%20skyline%20background%2C%20relaxing%20outdoor%20dining%2C%20Korean%20lifestyle%2C%20sunset%20atmosphere&width=300&height=200&seq=courselist6&orientation=landscape',
-      tags: ['음식', '피크닉', '한강'],
-      languages: ['한국어', '영어'],
-      date: '3월 30일',
-      category: 'food'
-    }
-  ];
+  // const courses = [
+  //   {
+  //     id: 1,
+  //     title: '경복궁과 북촌 한옥마을 투어',
+  //     host: '김민지',
+  //     university: '서울대학교',
+  //     rating: 4.9,
+  //     reviews: 23,
+  //     price: '무료',
+  //     image: 'https://readdy.ai/api/search-image?query=Beautiful%20traditional%20Korean%20palace%20Gyeongbokgung%20with%20colorful%20hanbok%20people%20walking%2C%20bright%20sunny%20day%2C%20cultural%20heritage%20site%2C%20vibrant%20colors%2C%20travel%20photography%20style%2C%20high%20quality%2C%20detailed%20architecture&width=300&height=200&seq=courselist1&orientation=landscape',
+  //     tags: ['문화체험', '역사', '사진촬영'],
+  //     languages: ['한국어', '영어'],
+  //     date: '3월 15일',
+  //     category: 'culture'
+  //   },
+  //   {
+  //     id: 2,
+  //     title: '홍대 야시장과 K-POP 체험',
+  //     host: '박서준',
+  //     university: '연세대학교',
+  //     rating: 4.8,
+  //     reviews: 31,
+  //     price: '15,000원',
+  //     image: 'https://readdy.ai/api/search-image?query=Vibrant%20Korean%20night%20market%20in%20Hongdae%20with%20colorful%20street%20food%20stalls%2C%20neon%20lights%2C%20young%20people%20enjoying%20food%2C%20lively%20atmosphere%2C%20urban%20nightlife%2C%20warm%20lighting%2C%20cultural%20experience&width=300&height=200&seq=courselist2&orientation=landscape',
+  //     tags: ['음식', 'K-POP', '야시장'],
+  //     languages: ['한국어', '영어', '중국어'],
+  //     date: '3월 18일',
+  //     category: 'kpop'
+  //   },
+  //   {
+  //     id: 3,
+  //     title: '제주도 올레길 트레킹',
+  //     host: '이하늘',
+  //     university: '제주대학교',
+  //     rating: 5.0,
+  //     reviews: 18,
+  //     price: '25,000원',
+  //     image: 'https://readdy.ai/api/search-image?query=Beautiful%20Jeju%20Island%20Olle%20trail%20with%20ocean%20view%2C%20green%20hills%2C%20walking%20path%2C%20clear%20blue%20sky%2C%20peaceful%20nature%20scenery%2C%20hiking%20adventure%2C%20Korean%20landscape%2C%20travel%20destination&width=300&height=200&seq=courselist3&orientation=landscape',
+  //     tags: ['자연', '트레킹', '힐링'],
+  //     languages: ['한국어', '영어'],
+  //     date: '3월 22일',
+  //     category: 'nature'
+  //   },
+  //   {
+  //     id: 4,
+  //     title: '부산 해운대와 감천문화마을',
+  //     host: '최유진',
+  //     university: '부산대학교',
+  //     rating: 4.7,
+  //     reviews: 27,
+  //     price: '20,000원',
+  //     image: 'https://readdy.ai/api/search-image?query=Colorful%20Gamcheon%20Culture%20Village%20in%20Busan%20with%20rainbow%20houses%20on%20hillside%2C%20artistic%20murals%2C%20coastal%20city%20view%2C%20bright%20sunny%20day%2C%20Korean%20cultural%20landmark%2C%20vibrant%20community%20art&width=300&height=200&seq=courselist4&orientation=landscape',
+  //     tags: ['해변', '문화마을', '예술'],
+  //     languages: ['한국어', '영어', '일본어'],
+  //     date: '3월 25일',
+  //     category: 'culture'
+  //   },
+  //   {
+  //     id: 5,
+  //     title: '명동 쇼핑과 한국 뷰티 체험',
+  //     host: '정수아',
+  //     university: '이화여자대학교',
+  //     rating: 4.6,
+  //     reviews: 19,
+  //     price: '10,000원',
+  //     image: 'https://readdy.ai/api/search-image?query=Busy%20Myeongdong%20shopping%20street%20in%20Seoul%20with%20Korean%20cosmetics%20stores%2C%20fashion%20shops%2C%20bright%20neon%20signs%2C%20crowded%20pedestrian%20area%2C%20modern%20urban%20shopping%20district%2C%20vibrant%20commercial%20area&width=300&height=200&seq=courselist5&orientation=landscape',
+  //     tags: ['쇼핑', '뷰티', '패션'],
+  //     languages: ['한국어', '영어', '중국어'],
+  //     date: '3월 28일',
+  //     category: 'shopping'
+  //   },
+  //   {
+  //     id: 6,
+  //     title: '한강 피크닉과 치킨 파티',
+  //     host: '김태현',
+  //     university: '고려대학교',
+  //     rating: 4.5,
+  //     reviews: 15,
+  //     price: '18,000원',
+  //     image: 'https://readdy.ai/api/search-image?query=Han%20River%20picnic%20in%20Seoul%20with%20people%20enjoying%20fried%20chicken%20and%20beer%2C%20beautiful%20river%20view%2C%20city%20skyline%20background%2C%20relaxing%20outdoor%20dining%2C%20Korean%20lifestyle%2C%20sunset%20atmosphere&width=300&height=200&seq=courselist6&orientation=landscape',
+  //     tags: ['음식', '피크닉', '한강'],
+  //     languages: ['한국어', '영어'],
+  //     date: '3월 30일',
+  //     category: 'food'
+  //   }
+  // ];
 
-  const filteredCourses = courses.filter(course => 
-    selectedCategory === 'all' || course.category === selectedCategory
+ // 🔹 Firestore에서 전체 코스 불러오기
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const data = await courseRepository.getAllCourses();
+        setCourses(data);
+      } catch (e) {
+        console.error('코스 불러오기 실패:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  // 🔹 카테고리 필터 (category 필드가 있다고 가정, 없으면 tags 기준으로 바꿔도 됨)
+  const filteredCourses = courses.filter((course: any) =>
+    selectedCategory === 'all' ||
+    course.category === selectedCategory ||
+    (Array.isArray(course.tags) && course.tags.includes(selectedCategory))
   );
 
-  return (
-    // ✅ pb-20 추가: 아래 BottomNav 공간 확보
+  // 🔹 정렬 옵션 (가격 기준 예시)
+  const sortedCourses = [...filteredCourses].sort((a: any, b: any) => {
+    if (sortBy === 'price-low') return a.price - b.price;
+    if (sortBy === 'price-high') return b.price - a.price;
+    // 나머지 popular/latest/rating은 나중에 createdAt, rating 필드 추가해서 구현하면 됨
+    return 0;
+  });
+
+  // 가격 표시 포맷
+  const formatPrice = (price: number) => {
+    if (price === 0) return '무료';
+    return `${price.toLocaleString()}원`;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-50 to-blue-50">
+        <span className="text-gray-600">코스를 불러오는 중입니다...</span>
+      </div>
+    );
+  }
+ return (
+    // ✅ pb-20: BottomNav 공간 확보
     <div className="min-h-screen bg-gradient-to-b from-sky-50 to-blue-50 pb-20">
       {/* 상단 네비게이션 */}
       <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-sky-100 z-50">
         <div className="flex items-center justify-between px-4 py-3">
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="w-8 h-8 flex items-center justify-center"
           >
@@ -183,27 +226,30 @@ export default function CourseList() {
 
         {/* 코스 목록 */}
         <div className="px-4 space-y-4">
-          {filteredCourses.map((course) => (
+          {sortedCourses.map((course: any) => (
             <div
               key={course.id}
-              onClick={() => navigate('/course-detail')}
+              onClick={() => navigate('/course-detail/' + course.id)}
               className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
             >
               <div className="relative">
                 <img
-                  src={course.image}
+                  src={
+                    course.image ||
+                    'https://readdy.ai/api/search-image?query=Beautiful%20traditional%20Korean%20palace%20Gyeongbokgung%20with%20colorful%20hanbok%20people%20walking%2C%20bright%20sunny%20day%2C%20cultural%20heritage%20site%2C%20vibrant%20colors%2C%20travel%20photography%20style%2C%20high%20quality%2C%20detailed%20architecture&width=300&height=200&seq=courselist1&orientation=landscape'
+                  }
                   alt={course.title}
                   className="w-full h-48 object-cover"
                 />
                 <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
                   <span className="text-xs font-medium text-gray-700">
-                    {course.price}
+                    {formatPrice(course.price)}
                   </span>
                 </div>
-                <button 
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    // 찜하기 로직
+                    // TODO: 찜하기 로직
                   }}
                   className="absolute top-3 left-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center"
                 >
@@ -218,12 +264,13 @@ export default function CourseList() {
                   </h4>
                 </div>
 
+                {/* host / university는 미래에 코스 문서에 추가한다고 가정 */}
                 <div className="flex items-center space-x-2 mb-3">
                   <div className="w-6 h-6 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center">
                     <i className="ri-user-line text-white text-xs"></i>
                   </div>
                   <span className="text-sm text-gray-600">
-                    {course.host} • {course.university}
+                    {course.host ?? '김민지'}{course.university ? ` • ${course.university}` : ''}
                   </span>
                 </div>
 
@@ -231,42 +278,47 @@ export default function CourseList() {
                   <div className="flex items-center space-x-1">
                     <i className="ri-star-fill text-yellow-400 text-sm"></i>
                     <span className="text-sm font-medium text-gray-700">
-                      {course.rating}
+                      {course.rating ?? '4.8'}
                     </span>
-                    <span className="text-sm text-gray-500">
-                      ({course.reviews})
-                    </span>
+                    {course.reviews && (
+                      <span className="text-sm text-gray-500">
+                        ({course.reviews})
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center space-x-1">
                     <i className="ri-calendar-line text-gray-400 text-sm"></i>
                     <span className="text-sm text-gray-600">
-                      {course.date}
+                      {course.date ?? ''}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-3">
-                  {course.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-sky-50 text-sky-600 text-xs rounded-full"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
+                  {Array.isArray(course.tags) &&
+                    course.tags.map((tag: string, index: number) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 bg-sky-50 text-sky-600 text-xs rounded-full"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-1">
                     <i className="ri-global-line text-gray-400 text-sm"></i>
                     <span className="text-xs text-gray-500">
-                      {course.languages.join(', ')}
+                      {Array.isArray(course.languages)
+                        ? course.languages.join(', ')
+                        : ''}
                     </span>
                   </div>
-                  <button 
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate('/course-detail');
+                      navigate('/course-detail/' + course.id);
                     }}
                     className="bg-sky-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-sky-600 transition-colors"
                   >
@@ -276,10 +328,16 @@ export default function CourseList() {
               </div>
             </div>
           ))}
+
+          {sortedCourses.length === 0 && (
+            <div className="text-center text-gray-500 text-sm py-10">
+              선택한 조건에 맞는 코스가 없어요.
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ✅ 공통 하단 네비게이션 */}
+      {/* 공통 하단 네비게이션 */}
       <BottomNav />
     </div>
   );

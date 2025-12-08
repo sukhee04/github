@@ -32,6 +32,10 @@ const routes: RouteObject[] = [
     element: <CourseDetail />
   },
   {
+    path: '/course-detail/:id',
+    element: <CourseDetail />
+  },
+  {
     path: '/course-list',
     element: <CourseList />
   },

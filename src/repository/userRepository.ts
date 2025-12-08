@@ -1,7 +1,5 @@
-// src/repositories/userRepository.ts (또는 .js)
 import {
   collection,
-  addDoc,
   getDocs,
   doc,
   getDoc,
@@ -10,10 +8,29 @@ import {
   query,
   where,
   limit,
+  setDoc,
+  serverTimestamp,
 } from "firebase/firestore";
-import { db } from "./firebaseConfig.js";
+import { auth, db } from "./firebaseConfig";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 
 const usersCol = collection(db, "users");
+
+export type AppUser = {
+  id: string;
+  uid: string;
+  email: string;
+  name: string;
+  university: string;
+  userType: "korean" | "international";
+  languages: string[];
+  interests: string[];
+  createdAt?: any;
+};
 
 export const userRepository = {
   // 회원가입
@@ -26,11 +43,47 @@ export const userRepository = {
     interests: string[];
     userType: "korean" | "international";
   }) {
-    const docRef = await addDoc(usersCol, {
-      ...user,
-      createdAt: new Date(),
+    // 1) Auth 계정 생성
+    const res = await createUserWithEmailAndPassword(
+      auth,
+      user.email,
+      user.password
+    );
+
+    // 2) Auth 프로필 displayName 설정
+    await updateProfile(res.user, {
+      displayName: user.name,
     });
-    return docRef.id;
+
+    // 3) Firestore users 문서 생성 (문서 ID = uid)
+    await setDoc(doc(db, "users", res.user.uid), {
+      uid: res.user.uid,
+      email: user.email,
+      name: user.name,
+      university: user.university,
+      userType: user.userType,
+      languages: user.languages,
+      interests: user.interests,
+      createdAt: serverTimestamp(),
+    });
+
+    return res.user.uid;
+  },
+
+  // 로그인 (Auth + Firestore 유저 정보 반환)
+  async login(email: string, password: string) {
+    // 1) Firebase Auth 로그인
+    const res = await signInWithEmailAndPassword(auth, email, password);
+
+    // 2) Firestore에서 해당 uid의 user 문서 가져오기
+    const snap = await getDoc(doc(db, "users", res.user.uid));
+    if (!snap.exists()) {
+      return null;
+    }
+
+    // 필요하면 any로 두고 빠르게 진행해도 됨
+    const user: any = { id: snap.id, ...snap.data() };
+    return user;
   },
 
   // 전체 유저 조회
@@ -40,32 +93,34 @@ export const userRepository = {
   },
 
   // 특정 유저 조회
-  async getUserById(id: string) {
+  async getUserById(id: string): Promise<AppUser | null> {
     const ref = doc(db, "users", id);
     const snap = await getDoc(ref);
+
     if (!snap.exists()) return null;
-    return { id: snap.id, ...snap.data() };
+
+    const data = snap.data() as any;
+
+    return {
+      id: snap.id,
+      uid: data.uid,
+      email: data.email,
+      name: data.name,
+      university: data.university,
+      userType: data.userType,
+      languages: data.languages ?? [],
+      interests: data.interests ?? [],
+      createdAt: data.createdAt,
+    };
   },
 
-  // 이메일로 유저 한 명 찾기
+  // 이메일로 유저 한 명 찾기 (필요하면 유지)
   async findByEmail(email: string) {
     const q = query(usersCol, where("email", "==", email), limit(1));
     const snap = await getDocs(q);
     if (snap.empty) return null;
     const d = snap.docs[0];
     return { id: d.id, ...d.data() };
-  },
-
-  // 로그인 (이메일 + 비밀번호 확인)
-  async login(email: string, password: string) {
-    const user: any = await this.findByEmail(email);
-    if (!user) {
-      return null; // 이메일 없음
-    }
-    if (user.password !== password) {
-      return null; // 비밀번호 불일치
-    }
-    return user; // 로그인 성공 → 유저 데이터 반환
   },
 
   // 유저 수정

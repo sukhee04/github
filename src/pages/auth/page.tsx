@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 
 import { userRepository } from "../../repository/userRepository";
 import { StorageManager } from "./storageManager";
+import { signInWithEmailAndPassword } from "firebase/auth";
+
+
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -46,6 +49,7 @@ export default function Auth() {
     if (isLogin) {
       // 로그인 로직
       try {
+
         const user = await userRepository.login(
           formData.email,
           formData.password

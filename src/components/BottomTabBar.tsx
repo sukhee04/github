@@ -6,7 +6,6 @@ export default function BottomTabBar() {
   const location = useLocation();
 
   const tabs = [
-    { label: "홈", path: "/", icon: "ri-home-5-line" },
     { label: "코스", path: "/courses", icon: "ri-map-pin-line" },
     { label: "매칭", path: "/matches", icon: "ri-heart-3-line" },
     { label: "채팅", path: "/chats", icon: "ri-chat-3-line" },

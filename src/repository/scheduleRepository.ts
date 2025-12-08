@@ -11,7 +11,7 @@ import {
   where,
   orderBy,
 } from "firebase/firestore";
-import { db } from "./firebaseConfig.js";
+import { db } from "./firebaseConfig";
 
 const schedulesCol = collection(db, "courseSchedules");
 

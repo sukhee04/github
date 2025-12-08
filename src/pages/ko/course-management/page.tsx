@@ -1,15 +1,147 @@
+  // const [requests, setRequests] = useState([
+  //   {
+  //     id: 1,
+  //     userName: '김유진',
+  //     university: '연세대학교 교환학생',
+  //     courseTitle: '경복궁과 북촌 한옥마을 투어',
+  //     message: '한국 전통 문화에 관심이 많아서 신청했습니다. 한복 체험도 가능한가요?',
+  //     languages: ['영어', '중국어'],
+  //     rating: 4.8,
+  //     reviews: 12,
+  //     time: '2시간 전',
+  //     status: 'pending'
+  //   },
+  //   {
+  //     id: 2,
+  //     userName: '마이클 존슨',
+  //     university: '서울대학교 교환학생',
+  //     courseTitle: '경복궁과 북촌 한옥마을 투어',
+  //     message: '친구 2명과 함께 참가하고 싶습니다.',
+  //     languages: ['영어'],
+  //     rating: 4.9,
+  //     reviews: 8,
+  //     time: '5시간 전',
+  //     status: 'pending'
+  //   },
+  //   {
+  //     id: 3,
+  //     userName: '사라 윌슨',
+  //     university: '고려대학교 교환학생',
+  //     courseTitle: '홍대 야시장과 K-POP 체험',
+  //     message: 'K-POP에 정말 관심이 많아요! 꼭 참가하고 싶습니다.',
+  //     languages: ['영어', '일본어'],
+  //     rating: 4.6,
+  //     reviews: 15,
+  //     time: '1일 전',
+  //     status: 'pending'
+  //   }
+  // ]);
+
+  // // 신청 완료된 참가자 목록
+  // const [participants, setParticipants] = useState([
+  //   {
+  //     id: 1,
+  //     courseId: "1",
+  //     courseTitle: '경복궁과 북촌 한옥마을 투어',
+  //     userName: '에밀리 존슨',
+  //     university: '연세대학교 교환학생',
+  //     country: '미국',
+  //     languages: ['영어', '한국어'],
+  //     rating: 4.9,
+  //     reviews: 15,
+  //     joinDate: '2024-03-10',
+  //     groupSize: 1,
+  //     phone: '+82-10-1234-5678',
+  //     email: 'emily.johnson@yonsei.ac.kr',
+  //     specialRequests: '한복 체험에 특히 관심이 있습니다.'
+  //   },
+  //   {
+  //     id: 2,
+  //     courseId: "1",
+  //     courseTitle: '경복궁과 북촌 한옥마을 투어',
+  //     userName: '다니엘 김',
+  //     university: '서울대학교 교환학생',
+  //     country: '캐나다',
+  //     languages: ['영어', '프랑스어'],
+  //     rating: 4.7,
+  //     reviews: 8,
+  //     joinDate: '2024-03-11',
+  //     groupSize: 2,
+  //     phone: '+82-10-2345-6789',
+  //     email: 'daniel.kim@snu.ac.kr',
+  //     specialRequests: '친구와 함께 참가합니다.'
+  //   },
+  //   {
+  //     id: 3,
+  //     courseId: "2",
+  //     courseTitle: '홍대 야시장과 K-POP 체험',
+  //     userName: '마리아 가르시아',
+  //     university: '고려대학교 교환학생',
+  //     country: '스페인',
+  //     languages: ['스페인어', '영어'],
+  //     rating: 4.8,
+  //     reviews: 12,
+  //     joinDate: '2024-03-12',
+  //     groupSize: 1,
+  //     phone: '+82-10-3456-7890',
+  //     email: 'maria.garcia@korea.ac.kr',
+  //     specialRequests: 'K-POP 댄스 체험을 원합니다.'
+  //   },
+  //   {
+  //     id: 4,
+  //     courseId: "2",
+  //     courseTitle: '홍대 야시장과 K-POP 체험',
+  //     userName: '타카시 야마다',
+  //     university: '성균관대학교 교환학생',
+  //     country: '일본',
+  //     languages: ['일본어', '영어'],
+  //     rating: 4.6,
+  //     reviews: 20,
+  //     joinDate: '2024-03-13',
+  //     groupSize: 3,
+  //     phone: '+82-10-4567-8901',
+  //     email: 'takashi.yamada@skku.edu',
+  //     specialRequests: '일본 친구들과 함께 참가합니다.'
+  //   }
+  // ]);
+
+  // const myCourses = [
+  //   {
+  //     id: 1,
+  //     title: '경복궁과 북촌 한옥마을 투어',
+  //     status: 'active',
+  //     participants: 3,
+  //     maxParticipants: 5,
+  //     date: '3월 15일',
+  //     price: '무료',
+  //     requests: 7
+  //   },
+  //   {
+  //     id: 2,
+  //     title: '홍대 야시장과 K-POP 체험',
+  //     status: 'full',
+  //     participants: 4,
+  //     maxParticipants: 4,
+  //     date: '3월 18일',
+  //     price: '15,000원',
+  //     requests: 12
+  //   }
+  // ];
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '../KoBottomNav';
 import { StorageManager } from '../../auth/storageManager';
 import { courseRepository } from '../../../repository/courseRepository';
 import { scheduleRepository } from '../../../repository/scheduleRepository';
+import { matchingRepository, MatchRequest } from '../../../repository/matchingRepository';
+import { userRepository } from '../../../repository/userRepository';
 
 export default function CourseManagement() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('my-courses');
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  
   const [newCourse, setNewCourse] = useState({
     userId: '',
     place: '',
@@ -34,189 +166,238 @@ export default function CourseManagement() {
     maxParticipants: number;
     date: string;
     price: string;
-    requests: number;
+    requests: number; // 🔹 해당 코스의 pending 매칭 요청 수
   };
+
+  type UIMatchRequest = MatchRequest & {
+    id: string;          // Firestore 문서 ID
+    courseTitle?: string;
+    guestName?: string;  // 🔹 신청자 이름
+  };
+
+  type ParticipantUI = {
+    id: string;          // matchRequests 문서 ID 사용
+    courseId: string;
+    courseTitle: string;
+    userName: string;
+
+    university?: string;
+    country?: string;
+    languages: string[];
+
+    rating?: number;
+    reviews?: number;
+    joinDate: string;    // "2025-12-09" 이런 형식
+    groupSize: number;
+
+    phone?: string;
+    email?: string;
+    specialRequests?: string;
+  };
+
+
+  const [requests, setRequests] = useState<UIMatchRequest[]>([]);
+  const [participants, setParticipants] = useState<ParticipantUI[]>([]);
 
   const [myCourses, setMyCourses] = useState<MyCourseCard[]>([]);
 
   const user = StorageManager.get("user");
 
-      const init = async () => {
-      if (user == null) {
-        StorageManager.clear();
-        navigate("/auth");
-        return;
+  // 초기화 화면 정보 불러오기
+  const init = async () => {
+    if (user == null) {
+      StorageManager.clear();
+      navigate("/auth");
+      return;
+    }
+
+    console.log(`userId: ${user.id}`);
+    console.log(`userName: ${user.name}`);
+
+    // 1) 내가 만든 코스들
+    const courses = await courseRepository.getCoursesByUser(user.id);
+
+    if (!courses || courses.length === 0) {
+      console.log("코스 없음");
+      setMyCourses([]);
+    } else {
+      console.log("코스 목록:", courses);
+
+      const mapped = courses.map((c: any) => ({
+        id: c.id,
+        title: c.title,
+        status: (c.participants >= c.maxParticipants ? 'full' : 'active') as 'active' | 'full',
+        participants: c.participants ?? 0,
+        maxParticipants: c.maxParticipants ?? 0,
+        date: c.date,
+        price: c.price === 0 ? "무료" : `${c.price.toLocaleString()}원`,
+        requests: 0, // 이건 나중에 요청 개수 세서 넣어도 됨
+      }));
+
+      setMyCourses(mapped);
+    }
+
+    // 2) 내 코스들에 들어온 매칭 요청
+    const hostRequests = await matchingRepository.getRequestsForHost(user.id);
+    console.log("hostRequests:", hostRequests);
+
+    // 3) guestId → user 정보 매핑
+    const guestMap: Record<
+      string,
+      {
+        name: string;
+        university?: string;
+        email?: string;
+        languages?: string[];
       }
+    > = {};
 
-      console.log(`userId: ${user.id}`);
-      console.log(`userName: ${user.name}`);
+    await Promise.all(
+      hostRequests.map(async (r) => {
+        if (!r.guestId) return;
+        if (guestMap[r.guestId]) return;
 
-      const courses = await courseRepository.getCoursesByUser(user.id);
-
-      if (!courses || courses.length === 0) {
-        console.log("코스 없음");
-        setMyCourses([]);   // 🔹 빈 배열로 세팅
-      } else {
-        console.log("코스 목록:", courses);
-
-        // Firestore에서 가져온 형태를 화면에서 쓰기 좋은 형태로 매핑
-        const mapped = courses.map((c: any) => ({
-          id: c.id,
-          title: c.title,
-          status: (c.curNum >= c.maxParticipants ? 'full' : 'active') as 'active' | 'full',
-          participants: c.participants,
-          maxParticipants: c.maxParticipants,
-          date: c.date, // 필요하면 여기서 포맷팅
-          price: c.price === 0 ? "무료" : `${c.price.toLocaleString()}원`,
-          requests: 0, // 아직 요청 데이터 없으니 0으로
-        }));
-
-        setMyCourses(mapped);
-
-        const storedUser = StorageManager.get("user");
-        if (storedUser) {
-          console.log("유저:", storedUser.name);
+        const u = await userRepository.getUserById(r.guestId);
+        if (!u) {
+          guestMap[r.guestId] = {
+            name: `신청자(${r.guestId})`,
+          };
+          return;
         }
-      }
+
+        guestMap[r.guestId] = {
+          name: u.name,
+          university: u.university,
+          email: u.email,
+          languages: u.languages,
+        };
+      })
+    );
+
+
+    // 4) 코스 제목 + 신청자 이름 붙이기
+    const uiRequests: UIMatchRequest[] = hostRequests.map((r) => {
+      const course = courses?.find((c: any) => c.id === r.courseId);
+      const guest = guestMap[r.guestId];
+
+      return {
+        ...r,
+        id: r.id!, // matchingRepository에서 이미 넣어줬을 거라고 가정
+        courseTitle: course?.title ?? "알 수 없는 코스",
+        guestName: guest?.name ?? `신청자(${r.guestId})`,
+      };
+    });
+
+    // 🔹 5) accepted 상태인 요청들 → 참가자 목록으로 변환
+  const acceptedRequests = hostRequests.filter(
+    (r) => r.status === "accepted"
+  );
+
+  const participantList: ParticipantUI[] = acceptedRequests.map((r) => {
+    const course = courses?.find((c: any) => c.id === r.courseId);
+    const guest = guestMap[r.guestId];
+    const created =
+      r.createdAt && typeof (r.createdAt as any).toDate === "function"
+        ? (r.createdAt as any).toDate()
+        : null;
+
+    return {
+      id: r.id!, // matchRequests 문서 ID
+      courseId: r.courseId,
+      courseTitle: course?.title ?? "알 수 없는 코스",
+      userName: guest?.name ?? `신청자(${r.guestId})`,
+      university: guest?.university,
+      country: "", // 나중에 user에 country 추가하면 채우면 됨
+      languages: guest?.languages ?? [],
+      rating: undefined,
+      reviews: undefined,
+      joinDate: created
+        ? created.toISOString().split("T")[0]
+        : "-",
+      groupSize: r.groupSize,
+      phone: "", // phone 정보도 나중에 users에 추가하면 여기서 넣으면 됨
+      email: guest?.email,
+      specialRequests: r.message,
     };
+  });
+
+  setParticipants(participantList);
+  };
+
+
 
   useEffect(() => {
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
-
-
-
-
-  const [requests, setRequests] = useState([
-    {
-      id: 1,
-      userName: '김유진',
-      university: '연세대학교 교환학생',
-      courseTitle: '경복궁과 북촌 한옥마을 투어',
-      message: '한국 전통 문화에 관심이 많아서 신청했습니다. 한복 체험도 가능한가요?',
-      languages: ['영어', '중국어'],
-      rating: 4.8,
-      reviews: 12,
-      time: '2시간 전',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      userName: '마이클 존슨',
-      university: '서울대학교 교환학생',
-      courseTitle: '경복궁과 북촌 한옥마을 투어',
-      message: '친구 2명과 함께 참가하고 싶습니다.',
-      languages: ['영어'],
-      rating: 4.9,
-      reviews: 8,
-      time: '5시간 전',
-      status: 'pending'
-    },
-    {
-      id: 3,
-      userName: '사라 윌슨',
-      university: '고려대학교 교환학생',
-      courseTitle: '홍대 야시장과 K-POP 체험',
-      message: 'K-POP에 정말 관심이 많아요! 꼭 참가하고 싶습니다.',
-      languages: ['영어', '일본어'],
-      rating: 4.6,
-      reviews: 15,
-      time: '1일 전',
-      status: 'pending'
-    }
-  ]);
-
-  // 신청 완료된 참가자 목록
-  const [participants, setParticipants] = useState([
-    {
-      id: 1,
-      courseId: "1",
-      courseTitle: '경복궁과 북촌 한옥마을 투어',
-      userName: '에밀리 존슨',
-      university: '연세대학교 교환학생',
-      country: '미국',
-      languages: ['영어', '한국어'],
-      rating: 4.9,
-      reviews: 15,
-      joinDate: '2024-03-10',
-      groupSize: 1,
-      phone: '+82-10-1234-5678',
-      email: 'emily.johnson@yonsei.ac.kr',
-      specialRequests: '한복 체험에 특히 관심이 있습니다.'
-    },
-    {
-      id: 2,
-      courseId: "1",
-      courseTitle: '경복궁과 북촌 한옥마을 투어',
-      userName: '다니엘 김',
-      university: '서울대학교 교환학생',
-      country: '캐나다',
-      languages: ['영어', '프랑스어'],
-      rating: 4.7,
-      reviews: 8,
-      joinDate: '2024-03-11',
-      groupSize: 2,
-      phone: '+82-10-2345-6789',
-      email: 'daniel.kim@snu.ac.kr',
-      specialRequests: '친구와 함께 참가합니다.'
-    },
-    {
-      id: 3,
-      courseId: "2",
-      courseTitle: '홍대 야시장과 K-POP 체험',
-      userName: '마리아 가르시아',
-      university: '고려대학교 교환학생',
-      country: '스페인',
-      languages: ['스페인어', '영어'],
-      rating: 4.8,
-      reviews: 12,
-      joinDate: '2024-03-12',
-      groupSize: 1,
-      phone: '+82-10-3456-7890',
-      email: 'maria.garcia@korea.ac.kr',
-      specialRequests: 'K-POP 댄스 체험을 원합니다.'
-    },
-    {
-      id: 4,
-      courseId: "2",
-      courseTitle: '홍대 야시장과 K-POP 체험',
-      userName: '타카시 야마다',
-      university: '성균관대학교 교환학생',
-      country: '일본',
-      languages: ['일본어', '영어'],
-      rating: 4.6,
-      reviews: 20,
-      joinDate: '2024-03-13',
-      groupSize: 3,
-      phone: '+82-10-4567-8901',
-      email: 'takashi.yamada@skku.edu',
-      specialRequests: '일본 친구들과 함께 참가합니다.'
-    }
-  ]);
-
-  // const myCourses = [
+  // 신청 완료된 참가자(더미 데이터) – 나중에 실제 data로 교체 예정
+  // const [participants, setParticipants] = useState([
   //   {
   //     id: 1,
-  //     title: '경복궁과 북촌 한옥마을 투어',
-  //     status: 'active',
-  //     participants: 3,
-  //     maxParticipants: 5,
-  //     date: '3월 15일',
-  //     price: '무료',
-  //     requests: 7
+  //     courseId: "1",
+  //     courseTitle: '경복궁과 북촌 한옥마을 투어',
+  //     userName: '에밀리 존슨',
+  //     university: '연세대학교 교환학생',
+  //     country: '미국',
+  //     languages: ['영어', '한국어'],
+  //     rating: 4.9,
+  //     reviews: 15,
+  //     joinDate: '2024-03-10',
+  //     groupSize: 1,
+  //     phone: '+82-10-1234-5678',
+  //     email: 'emily.johnson@yonsei.ac.kr',
+  //     specialRequests: '한복 체험에 특히 관심이 있습니다.'
   //   },
   //   {
   //     id: 2,
-  //     title: '홍대 야시장과 K-POP 체험',
-  //     status: 'full',
-  //     participants: 4,
-  //     maxParticipants: 4,
-  //     date: '3월 18일',
-  //     price: '15,000원',
-  //     requests: 12
+  //     courseId: "1",
+  //     courseTitle: '경복궁과 북촌 한옥마을 투어',
+  //     userName: '다니엘 김',
+  //     university: '서울대학교 교환학생',
+  //     country: '캐나다',
+  //     languages: ['영어', '프랑스어'],
+  //     rating: 4.7,
+  //     reviews: 8,
+  //     joinDate: '2024-03-11',
+  //     groupSize: 2,
+  //     phone: '+82-10-2345-6789',
+  //     email: 'daniel.kim@snu.ac.kr',
+  //     specialRequests: '친구와 함께 참가합니다.'
+  //   },
+  //   {
+  //     id: 3,
+  //     courseId: "2",
+  //     courseTitle: '홍대 야시장과 K-POP 체험',
+  //     userName: '마리아 가르시아',
+  //     university: '고려대학교 교환학생',
+  //     country: '스페인',
+  //     languages: ['스페인어', '영어'],
+  //     rating: 4.8,
+  //     reviews: 12,
+  //     joinDate: '2024-03-12',
+  //     groupSize: 1,
+  //     phone: '+82-10-3456-7890',
+  //     email: 'maria.garcia@korea.ac.kr',
+  //     specialRequests: 'K-POP 댄스 체험을 원합니다.'
+  //   },
+  //   {
+  //     id: 4,
+  //     courseId: "2",
+  //     courseTitle: '홍대 야시장과 K-POP 체험',
+  //     userName: '타카시 야마다',
+  //     university: '성균관대학교 교환학생',
+  //     country: '일본',
+  //     languages: ['일본어', '영어'],
+  //     rating: 4.6,
+  //     reviews: 20,
+  //     joinDate: '2024-03-13',
+  //     groupSize: 3,
+  //     phone: '+82-10-4567-8901',
+  //     email: 'takashi.yamada@skku.edu',
+  //     specialRequests: '일본 친구들과 함께 참가합니다.'
   //   }
-  // ];
+  // ]);
 
   const availableLanguages = ['한국어', '영어', '중국어', '일본어'];
   const availableTags = ['문화체험', '음식', '쇼핑', 'K-POP', '역사', '자연', '예술'];
@@ -262,99 +443,123 @@ export default function CourseManagement() {
     }));
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  console.log('New course:', newCourse);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('New course:', newCourse);
 
-  if (!user) {
-    alert("로그인이 필요합니다.");
-    navigate("/auth");
-    return;
-  }
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      navigate("/auth");
+      return;
+    }
 
-  try {
-    // 1) 코스 생성
-    const newCourseId = await courseRepository.createCourse({
-      userId: user.id,
-      title: newCourse.title,
-      description: newCourse.description,
-      date: newCourse.date,
-      place: newCourse.location,
-      maxParticipants: Number(newCourse.maxParticipants),
-      price: newCourse.price === "무료" ? 0 : Number(newCourse.price),
-      languages: newCourse.languages,
-      tags: newCourse.tags,
-      requirements: newCourse.requirements,
-    });
+    try {
+      // 1) 코스 생성 (hostName 추가)
+      const newCourseId = await courseRepository.createCourse({
+        userId: user.id,
+        hostName: user.name, // 🔹 코스 호스트 이름
+        title: newCourse.title,
+        description: newCourse.description,
+        date: newCourse.date,
+        place: newCourse.location,
+        maxParticipants: Number(newCourse.maxParticipants),
+        price: newCourse.price === "무료" ? 0 : Number(newCourse.price),
+        languages: newCourse.languages,
+        tags: newCourse.tags,
+        requirements: newCourse.requirements,
+        time: newCourse.time
+      } as any);
 
-    console.log("새로 생성된 코스 ID:", newCourseId);
+      console.log("새로 생성된 코스 ID:", newCourseId);
 
-    // 2) 일정 저장 (상세 일정 → schedule 컬렉션)
-    await Promise.all(
-      newCourse.itinerary.map((t) =>
-        scheduleRepository.createSchedule({
-          courseId: newCourseId,
-          // 날짜 + 시각을 합쳐서 하나의 문자열로 저장하고 싶으면 이렇게
-          time: `${newCourse.date} ${t.time}`,
-          description: t.activity,
-        })
-      )
-    );
+      // 2) 일정 저장 (상세 일정 → schedule 컬렉션)
+      await Promise.all(
+        newCourse.itinerary.map((t) =>
+          scheduleRepository.createSchedule({
+            courseId: newCourseId,
+            time: `${newCourse.date} ${t.time}`,
+            description: t.activity,
+          })
+        )
+      );
 
-    // 3) 폼 리셋 + 리스트 새로고침
-    setShowCreateForm(false);
-    setNewCourse({
-      userId: '',
-      place: '',
-      title: '',
-      description: '',
-      price: '',
-      date: '',
-      time: '',
-      location: '',
-      maxParticipants: '',
-      languages: [],
-      tags: [],
-      requirements: '',
-      itinerary: [{ time: '', activity: '' }],
-    });
+      // 3) 폼 리셋 + 리스트 새로고침
+      setShowCreateForm(false);
+      setNewCourse({
+        userId: '',
+        place: '',
+        title: '',
+        description: '',
+        price: '',
+        date: '',
+        time: '',
+        location: '',
+        maxParticipants: '',
+        languages: [],
+        tags: [],
+        requirements: '',
+        itinerary: [{ time: '', activity: '' }],
+      });
 
-    await init(); // 코스 목록 다시 불러오기
-  } catch (err) {
-    console.error("코스 생성/일정 저장 실패:", err);
-    alert("코스 생성 중 오류가 발생했습니다.");
-  }
-};
-
-
-  const handleAcceptRequest = (requestId: number) => {
-    setRequests(prev => prev.map(request =>
-      request.id === requestId
-        ? { ...request, status: 'accepted' }
-        : request
-    ));
-    // 수락 알림 표시
-    alert('매칭 요청을 수락했습니다!');
+      await init(); // 코스 + 매칭 요청 목록 다시 불러오기
+    } catch (err) {
+      console.error("코스 생성/일정 저장 실패:", err);
+      alert("코스 생성 중 오류가 발생했습니다.");
+    }
   };
 
-  const handleRejectRequest = (requestId: number) => {
-    setRequests(prev => prev.map(request =>
-      request.id === requestId
-        ? { ...request, status: 'rejected' }
-        : request
-    ));
-    // 거절 알림 표시
-    alert('매칭 요청을 거절했습니다.');
+  // 🔹 매칭 요청 수락
+  const handleAcceptRequest = async (requestId: string) => {
+    try {
+      await matchingRepository.updateStatus(requestId, "accepted");
+      setRequests(prev =>
+        prev.map(r =>
+          r.id === requestId ? { ...r, status: "accepted" } : r
+        )
+      );
+      alert('매칭 요청을 수락했습니다!');
+      await init(); // 상태 반영 위해 다시 불러오기 (코스 요청 수 갱신)
+    } catch (err) {
+      console.error("매칭 요청 수락 실패:", err);
+      alert("요청 수락 중 오류가 발생했습니다.");
+    }
   };
 
-  const handleRemoveParticipant = (participantId: number) => {
-    setParticipants(prev => prev.filter(p => p.id !== participantId));
+  // 🔹 매칭 요청 거절
+  const handleRejectRequest = async (requestId: string) => {
+    try {
+      await matchingRepository.updateStatus(requestId, "rejected");
+      setRequests(prev =>
+        prev.map(r =>
+          r.id === requestId ? { ...r, status: "rejected" } : r
+        )
+      );
+      alert('매칭 요청을 거절했습니다.');
+      await init();
+    } catch (err) {
+      console.error("매칭 요청 거절 실패:", err);
+      alert("요청 거절 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 🔹 참가자 삭제
+  const handleRemoveParticipant = (participantId: string) => {
+    setParticipants((prev) => prev.filter((p) => p.id !== participantId));
     setShowDeleteConfirm(null);
-    alert('참가자가 삭제되었습니다.');
+    alert("참가자가 삭제되었습니다.");
   };
 
-  const getParticipantsByCourse = (courseId: String) => {
-    return participants.filter(p => p.courseId === courseId);
+  // 🔹 코스별 참가자 필터
+  const getParticipantsByCourse = (courseId: string) => {
+    return participants.filter((p) => p.courseId === courseId);
+  };
+
+
+  // 🔹 createdAt → 간단한 표시용 문자열
+  const formatCreatedAt = (createdAt: any) => {
+    if (!createdAt || !createdAt.toDate) return '-';
+    const d = createdAt.toDate() as Date;
+    return d.toLocaleString();
   };
 
   return (
@@ -413,7 +618,6 @@ const handleSubmit = async (e: React.FormEvent) => {
         {activeTab === 'my-courses' && (
           <div className="px-4 space-y-4">
             {myCourses.length === 0 ? (
-              // 🔹 코스가 하나도 없을 때
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <i className="ri-map-pin-line text-gray-400 text-2xl"></i>
@@ -422,7 +626,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <p className="text-sm text-gray-400 mt-1">오른쪽 아래 + 버튼으로 첫 코스를 만들어보세요</p>
               </div>
             ) : (
-              // 🔹 코스가 있을 때
               myCourses.map((course) => (
                 <div
                   key={course.id}
@@ -434,8 +637,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </h3>
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${course.status === 'active'
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-orange-100 text-orange-600'
+                        ? 'bg-green-100 text-green-600'
+                        : 'bg-orange-100 text-orange-600'
                         }`}
                     >
                       {course.status === 'active' ? '모집중' : '마감'}
@@ -485,11 +688,10 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
         )}
 
-
         {/* 매칭 요청 탭 */}
         {activeTab === 'requests' && (
           <div className="px-4 space-y-4">
-            {requests.filter(request => request.status === 'pending').map((request) => (
+            {requests.filter(r => r.status === 'pending').map((request) => (
               <div
                 key={request.id}
                 className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4"
@@ -499,41 +701,40 @@ const handleSubmit = async (e: React.FormEvent) => {
                     <i className="ri-user-line text-white text-lg"></i>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-gray-800">{request.userName}</h4>
-                    <p className="text-sm text-gray-600">{request.university}</p>
+                    <h4 className="font-bold text-gray-800">
+                      {request.guestName ?? request.guestId}
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      {/* university는 아직 users 컬렉션에 저장 안 했으니 나중에 붙이면 됨 */}
+                      {request.courseTitle}
+                    </p>
+
                   </div>
-                  <span className="text-xs text-gray-500">{request.time}</span>
+                  <span className="text-xs text-gray-500">
+                    {formatCreatedAt(request.createdAt)}
+                  </span>
                 </div>
 
                 <div className="bg-gray-50 rounded-xl p-3 mb-3">
                   <p className="text-sm text-gray-700 font-medium mb-1">
-                    {request.courseTitle}
+                    {request.courseTitle ?? '코스 제목 없음'}
                   </p>
-                  <p className="text-xs text-gray-600">
-                    "{request.message}"
-                  </p>
-                </div>
-
-                <div className="flex items-center space-x-2 mb-3">
-                  <div className="flex items-center space-x-1">
-                    <i className="ri-global-line text-gray-400 text-sm"></i>
-                    <span className="text-xs text-gray-600">{request.languages.join(', ')}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <i className="ri-star-fill text-yellow-400 text-sm"></i>
-                    <span className="text-xs text-gray-600">{request.rating} ({request.reviews})</span>
-                  </div>
+                  {request.message && (
+                    <p className="text-xs text-gray-600">
+                      "{request.message}"
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => handleAcceptRequest(request.id)}
+                    onClick={() => handleAcceptRequest(request.id!)}
                     className="flex-1 bg-sky-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-sky-600 transition-colors"
                   >
                     수락
                   </button>
                   <button
-                    onClick={() => handleRejectRequest(request.id)}
+                    onClick={() => handleRejectRequest(request.id!)}
                     className="flex-1 bg-gray-100 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                   >
                     거절
@@ -542,7 +743,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
             ))}
 
-            {requests.filter(request => request.status === 'pending').length === 0 && (
+            {requests.filter(r => r.status === 'pending').length === 0 && (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <i className="ri-inbox-line text-gray-400 text-2xl"></i>
@@ -553,7 +754,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
         )}
 
-        {/* 참가자 탭 */}
+        {/* 참가자 탭 (지금은 더미 데이터 유지) */}
         {activeTab === 'participants' && (
           <div className="px-4 space-y-4">
             {myCourses.map((course) => {
@@ -606,7 +807,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                           </div>
                           <div className="flex items-center space-x-2">
                             <i className="ri-star-fill text-yellow-400 text-sm"></i>
-                            <span className="text-sm text-gray-600">{participant.rating} ({participant.reviews})</span>
+                            <span className="text-sm text-gray-600">{participant.rating} ({participant.reviews}4.5)</span>
                           </div>
                           <div className="flex items-center space-x-2">
                             <i className="ri-global-line text-gray-400 text-sm"></i>
@@ -617,7 +818,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                         <div className="space-y-2">
                           <div className="flex items-center space-x-2">
                             <i className="ri-phone-line text-gray-400 text-sm"></i>
-                            <span className="text-sm text-gray-600">{participant.phone}</span>
+                            <span className="text-sm text-gray-600">{participant.phone}010-1234-5678</span>
                           </div>
                           <div className="flex items-center space-x-2">
                             <i className="ri-mail-line text-gray-400 text-sm"></i>
@@ -787,7 +988,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text_sm font-medium text-gray-700 mb-2">
                     참가비
                   </label>
                   <input
